@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hệ Thống Trắc Nghiệm EE2081 - Kevin Hoàng Anh</title>
+  
+  <!-- MathJax: Hỗ trợ hiển thị công thức Toán / Lý / Hóa -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+  <style>
+    :root {
+      --primary-blue: #0284c7;
+      --primary-dark: #0f2b5c;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #86efac;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-border: #fca5a5;
+    }
+
+    body.dark-mode {
+      --primary-blue: #38bdf8;
+      --primary-dark: #020617;
+      --bg-page: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-dark: #f1f5f9;
+      --text-muted: #94a3b8;
+      --success: #4ade80;
+      --success-bg: #064e3b;
+      --success-border: #059669;
+      --danger: #f87171;
+      --danger-bg: #7f1d1d;
+      --danger-border: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-dark);
+      padding-bottom: 60px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    #auth-screen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--primary-dark);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 9999; padding: 16px;
+    }
+
+    .auth-box {
+      background: var(--card-bg);
+      padding: 32px 28px;
+      border-radius: 16px;
+      width: 100%; max-width: 380px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+    }
+
+    .auth-box h2 { color: var(--primary-blue); font-size: 1.3rem; margin-bottom: 8px; }
+    .auth-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .auth-input {
+      width: 100%; padding: 12px; border: 1.5px solid var(--border-color);
+      border-radius: 10px; font-size: 1.1rem; text-align: center;
+      letter-spacing: 2px; outline: none; margin-bottom: 16px;
+      background: var(--bg-page); color: var(--text-dark);
+    }
+    .auth-btn {
+      width: 100%; padding: 12px; background-color: var(--primary-blue);
+      color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer;
+    }
+    .auth-error { color: var(--danger); font-size: 0.85rem; margin-top: 10px; display: none; }
+
+    .header-banner {
+      background: linear-gradient(135deg, #0c2340 0%, #1e3a8a 100%);
+      color: white; text-align: center; padding: 24px 16px; position: relative;
+    }
+    .theme-toggle-btn {
+      position: absolute; top: 16px; right: 16px;
+      background: rgba(255,255,255,0.2); border: none; color: white;
+      padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: 600;
+    }
+    .mode-badge {
+      display: inline-block; margin-top: 6px; padding: 4px 12px;
+      background: #0284c7; border-radius: 12px; font-size: 0.8rem; font-weight: 700;
+    }
+
+    .app-layout {
+      max-width: 1200px; margin: 0 auto; padding: 0 16px;
+      display: flex; gap: 20px; align-items: flex-start;
+    }
+    .main-container { flex: 1; min-width: 0; }
+
+    .palette-sidebar {
+      width: 260px; position: sticky; top: 20px;
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .palette-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; text-align: center; }
+    .palette-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+      max-height: 320px; overflow-y: auto; padding-right: 4px;
+    }
+    .palette-item {
+      height: 34px; display: flex; align-items: center; justify-content: center;
+      background: var(--bg-page); border: 1px solid var(--border-color);
+      border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+      color: var(--text-dark); text-decoration: none; cursor: pointer;
+    }
+    .palette-item.answered { background: #2563eb; color: white; border-color: #2563eb; }
+    .palette-item.correct { background: var(--success); color: white; border-color: var(--success); }
+    .palette-item.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+    .stats-card {
+      background: var(--card-bg); border-radius: 14px; padding: 16px 20px;
+      margin: 16px 0; border: 1px solid var(--border-color);
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .stat-items-group { display: flex; gap: 16px; }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 1.25rem; font-weight: 800; }
+    .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .stat-total { color: #0284c7; } .stat-done { color: #059669; }
+    .stat-correct { color: #16a34a; } .stat-wrong { color: #dc2626; }
+    .timer-display { font-size: 1.25rem; font-weight: 800; color: #ea580c; display: none; }
+
+    .action-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tool-btn {
+      padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600;
+      border: none; cursor: pointer; color: white;
+    }
+    .btn-exam { background: #dc2626; }
+    .btn-study { background: #0284c7; }
+    .btn-submit { background: #16a34a; display: none; }
+    .btn-reset { background: #f59e0b; }
+    .btn-result { background-color: #2563eb; }
+    .btn-show-all { background-color: #10b981; }
+    .btn-shuffle { background-color: #8b5cf6; }
+    .btn-unanswered { background-color: #ef4444; }
+    .progress-wrapper { flex: 1; min-width: 160px; }
+    .progress-bar-bg { height: 8px; background-color: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 4px; }
+    body.dark-mode .progress-bar-bg { background-color: #334155; }
+    .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #0284c7, #22c55e); border-radius: 999px; transition: width 0.3s ease; }
+    .progress-text { text-align: right; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+
+    .chapter-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .filter-btn {
+      background: var(--card-bg); color: var(--text-dark); border: 1px solid var(--border-color);
+      padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    }
+    .filter-btn.active { background: #0284c7; color: white; border-color: #0284c7; }
+
+    .question-card {
+      background: var(--card-bg); border-radius: 12px; padding: 18px 20px;
+      margin-bottom: 14px; border: 1px solid var(--border-color); scroll-margin-top: 20px;
+    }
+    .question-header { display: flex; gap: 10px; margin-bottom: 12px; }
+    .badge-idx {
+      background: #0284c7; color: white; font-size: 0.8rem; font-weight: 700;
+      width: 28px; height: 28px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .question-title { font-size: 0.95rem; line-height: 1.5; font-weight: 600; flex: 1; }
+    .question-title pre {
+      background: var(--bg-page); padding: 10px; border-radius: 6px;
+      margin-top: 6px; font-family: Consolas, monospace; border: 1px solid var(--border-color);
+      overflow-x: auto;
+    }
+    .options-grid { display: flex; flex-direction: column; gap: 8px; }
+    .option-item {
+      background: var(--card-bg); border: 1.5px solid var(--border-color);
+      border-radius: 8px; padding: 10px 14px; font-size: 0.9rem; cursor: pointer; color: var(--text-dark);
+    }
+    .option-item:hover:not(.locked) { border-color: #93c5fd; background: var(--bg-page); }
+    .option-item.selected-exam { background: #dbeafe !important; border-color: #2563eb !important; color: #1e3a8a !important; font-weight: 600; }
+    body.dark-mode .option-item.selected-exam { background: #1e3a8a !important; border-color: #60a5fa !important; color: #eff6ff !important; }
+    .option-item.opt-correct { background: var(--success-bg) !important; border-color: var(--success-border) !important; color: var(--success) !important; font-weight: 600; }
+    .option-item.opt-wrong { background: var(--danger-bg) !important; border-color: var(--danger-border) !important; color: var(--danger) !important; font-weight: 600; }
+    .solution-box {
+      display: none; background: var(--bg-page); border-left: 3.5px solid #0284c7;
+      border-radius: 0 6px 6px 0; padding: 10px 12px; margin-top: 10px; font-size: 0.85rem; line-height: 1.5;
+    }
+
+    @media (max-width: 850px) {
+      .app-layout { flex-direction: column-reverse; }
+      .palette-sidebar { width: 100%; position: static; }
+      .palette-grid { max-height: 140px; grid-template-columns: repeat(8, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MÀN HÌNH KHÓA -->
+  <div id="auth-screen">
+    <div class="auth-box">
+      <h2>🔒 Mật Khẩu Đề Thi</h2>
+      <p>Hệ thống trắc nghiệm của <b>Kevin Hoàng Anh 🏐</b></p>
+      <input type="password" id="pass-input" class="auth-input" placeholder="Nhập mật khẩu..." autofocus>
+      <button class="auth-btn" onclick="verifyPassword()">VÀO LÀM BÀI</button>
+      <div id="auth-error-msg" class="auth-error">Mật khẩu không chính xác!</div>
+    </div>
+  </div>
+
+ <!-- NỘI DUNG CHÍNH -->
+  <div id="app-content" style="display: none;">
+    <header class="header-banner">
+      <button class="theme-toggle-btn" onclick="toggleDarkMode()">🌓 Dark Mode</button>
+      <div class="author-tag">🏐 Biên soạn & Thiết kế: <b>Kevin Hoàng Anh</b></div>
+      <h1 id="page-title">Hệ Thống Ôn Luyện Trắc Nghiệm (EE2081)</h1>
+      <div class="mode-badge" id="mode-display">CHẾ ĐỘ ÔN TẬP</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Cột chính -->
+      <div class="main-container">
+        <!-- Bảng thống kê -->
+        <section class="stats-card">
+          <div class="stat-items-group">
+            <div class="stat-item"><div class="stat-num stat-total" id="stat-total">0</div><div class="stat-label">Tổng câu</div></div>
+            <div class="stat-item"><div class="stat-num stat-done" id="stat-done">0</div><div class="stat-label">Đã làm</div></div>
+            <div class="stat-item"><div class="stat-num stat-correct" id="stat-correct">0</div><div class="stat-label">Đúng</div></div>
+            <div class="stat-item"><div class="stat-num stat-wrong" id="stat-wrong">0</div><div class="stat-label">Sai</div></div>
+          </div>
+          <div class="timer-display" id="exam-timer">⏱ 60:00</div>
+          <div class="progress-wrapper" id="progress-container">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">0 / 0</div>
+          </div>
+        </section>
+
+        <!-- Thanh công cụ (Toolbar đầy đủ) -->
+        <section class="action-toolbar">
+          <button class="tool-btn btn-exam" id="btn-start-exam" onclick="startExamMode()">⏱ Thi thử (40 câu / 60p)</button>
+          <button class="tool-btn btn-study" id="btn-start-study" onclick="startStudyMode()" style="display:none;">📖 Ôn tập toàn bộ</button>
+          <button class="tool-btn btn-submit" id="btn-submit-exam" onclick="submitExam()">📤 Nộp bài thi</button>
+          <button class="tool-btn btn-result" onclick="viewResultSummary()">📊 Kết quả</button>
+          <button class="tool-btn btn-shuffle" onclick="shuffleQuestions()">🔀 Đảo câu hỏi</button>
+          <button class="tool-btn btn-show-all" id="btn-show-all" onclick="showAllAnswers()">👁 Hiện tất cả đáp án</button>
+          <button class="tool-btn btn-unanswered" id="btn-unanswered" onclick="filterUnanswered()">⚡ Câu chưa làm</button>
+          <button class="tool-btn btn-reset" onclick="resetState()">🔄 Làm lại</button>
+        </section>
+
+        <!-- Bộ lọc chương -->
+        <section class="chapter-filters" id="chapter-filter-list"></section>
+
+        <!-- Danh sách câu hỏi -->
+        <main id="questions-stream"></main>
+      </div>
+
+      <!-- Bảng số bên phải (Question Palette) -->
+      <aside class="palette-sidebar">
+        <div class="palette-title">BẢNG ĐIỀU HƯỚNG CÂU</div>
+        <div class="palette-grid" id="palette-grid"></div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. CẤU HÌNH MẬT KHẨU
+    // ==========================================
+    const ACCESS_PASS = "hoanganhcute";
+
+    function verifyPassword() {
+      const input = document.getElementById('pass-input').value;
+      const errorMsg = document.getElementById('auth-error-msg');
+      if (input === ACCESS_PASS) {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app-content').style.display = 'block';
+        initApp();
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    document.getElementById('pass-input').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') verifyPassword();
+    });
+
+    // ==========================================
+    // 2. NGÂN HÀNG CÂU HỎI (100 CÂU EE2081 ĐẦY ĐỦ)
+    // ==========================================
+    const rawQuizData = [
+      // PHẦN 1: TỔNG QUAN MÁY TÍNH VÀ NGÔN NGỮ C
+      {
+        id: 1,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Thành phần nào thực hiện các lệnh và xử lý dữ liệu trong hệ thống máy tính?",
+        options: ["A. Bộ nhớ chính.", "B. CPU.", "C. Thiết bị nhập.", "D. Thiết bị xuất."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> CPU (Central Processing Unit) là bộ xử lý trung tâm, đảm nhiệm việc tính toán, thực thi các lệnh và xử lý dữ liệu."
+      },
+      {
+        id: 2,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Vai trò chính của bộ nhớ trong hệ thống máy tính là gì?",
+        options: ["A. Chỉ hiển thị kết quả.", "B. Lưu chương trình và dữ liệu phục vụ xử lý.", "C. Chỉ nhập dữ liệu.", "D. Thay thế toàn bộ CPU."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Bộ nhớ (Memory - RAM/ROM) có chức năng lưu trữ chương trình (các lệnh mã máy) và dữ liệu đang chờ CPU xử lý."
+      },
+      {
+        id: 3,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Bus trong hệ thống máy tính có vai trò gì?",
+        options: ["A. Lưu vĩnh viễn mã nguồn.", "B. Biên dịch chương trình C.", "C. Hiển thị thông báo lỗi.", "D. Truyền dữ liệu, địa chỉ và tín hiệu điều khiển giữa các thành phần."],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Hệ thống Bus bao gồm Data Bus, Address Bus và Control Bus, dùng để truyền tải dữ liệu, địa chỉ và các tín hiệu điều khiển giữa CPU, bộ nhớ và ngoại vi."
+      },
+      {
+        id: 4,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Theo tiêu chuẩn quốc tế và quy định trong ngôn ngữ C, ký hiệu nào được dùng để phân tách giữa phần nguyên và phần thập phân của một số thực?",
+        options: ["A. Dấu chấm (.)", "B. Dấu phẩy (,)", "C. Dấu hai chấm (:)", "D. Dấu gạch dưới (_)"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Tiêu chuẩn ngôn ngữ C và chuẩn quốc tế quy ước sử dụng dấu chấm thập phân (ví dụ: 3.14159)."
+      },
+      {
+        id: 5,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Cặp thiết bị nào lần lượt là thiết bị nhập và thiết bị xuất?",
+        options: ["A. Màn hình và bàn phím.", "B. Máy in và chuột.", "C. Bàn phím và màn hình.", "D. CPU và RAM."],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Bàn phím (Keyboard) là thiết bị nhập (Input) và Màn hình (Monitor) là thiết bị xuất (Output)."
+      },
+      {
+        id: 6,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Trong chương trình C thông thường chạy trên máy tính, hàm nào là điểm bắt đầu thực thi mã của chương trình?",
+        options: ["A. printf().", "B. scanf().", "C. main().", "D. start()."],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Hàm main() là điểm vào chuẩn (Entry Point) của mọi chương trình C."
+      },
+      {
+        id: 7,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Tệp tiêu đề nào cần được đưa vào để dùng printf() và scanf() theo khai báo chuẩn?",
+        options: ["A. &lt;stdio.h&gt;", "B. &lt;math.h&gt;", "C. &lt;string.h&gt;", "D. &lt;time.h&gt;"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Thư viện chuẩn vào/ra tiêu chuẩn là Standard Input/Output (<stdio.h>)."
+      },
+      {
+        id: 8,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Lệnh nào in Hello World rồi xuống dòng?",
+        options: ["A. scanf(\"Hello World\");", "B. print(\"Hello World\");", "C. printf(\"Hello World\\n\");", "D. printf(Hello World);"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> printf() nhận chuỗi ký tự đặt trong dấu ngoặc kép, và '\\n' dùng để xuống dòng."
+      },
+      {
+        id: 9,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Thứ tự nào mô tả đúng các bước xây dựng và chạy một chương trình C đơn giản?",
+        options: [
+          "A. Soạn mã nguồn → Biên dịch → Liên kết → Chạy.",
+          "B. Chạy → Liên kết → Soạn mã → Biên dịch.",
+          "C. Liên kết → Chạy → Soạn mã → Biên dịch.",
+          "D. Biên dịch → Soạn mã → Chạy → Liên kết."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Quy trình chuẩn gồm: Soạn thảo (.c) → Biên dịch tạo file đối tượng (.o/.obj) → Liên kết (Linker) tạo file thực thi (.exe) → Chạy (Execute)."
+      },
+      {
+        id: 10,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Vai trò chính của trình biên dịch C là gì?",
+        options: [
+          "A. Đọc dữ liệu từ bàn phím.",
+          "B. Chỉ sửa lỗi thuật toán.",
+          "C. Chỉ ghép các thư viện.",
+          "D. Dịch mã nguồn và chẩn đoán các lỗi cú pháp, kiểu dữ liệu."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Trình biên dịch (Compiler) kiểm tra ngữ pháp cú pháp, phân tích ngữ nghĩa, kiểu dữ liệu và dịch từ mã nguồn bậc cao sang mã máy."
+      },
+      {
+        id: 11,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Đặc điểm nào cần có để một thuật toán giải bài toán kết thúc được?",
+        options: [
+          "A. Phải có ít nhất ba vòng lặp.",
+          "B. Phải được viết bằng C.",
+          "C. Có các bước xác định rõ và kết thúc sau hữu hạn bước với đầu vào hợp lệ.",
+          "D. Phải sử dụng đệ quy."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Thuật toán bắt buộc phải đảm bảo tính dừng (Finiteness): phải dừng lại sau một số hữu hạn các bước."
+      },
+      {
+        id: 12,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Ngôn ngữ lập trình C được phân loại vào cấp độ ngôn ngữ nào?",
+        options: [
+          "A. Ngôn ngữ bậc cao (High-level language) có khả năng thao tác phần cứng linh hoạt.",
+          "B. Ngôn ngữ máy (Machine-level language - mã nhị phân).",
+          "C. Ngôn ngữ bậc thấp sử dụng mã gợi nhớ (Assembly).",
+          "D. Ngôn ngữ kịch bản thuần túy không cần biên dịch."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> C là ngôn ngữ bậc cao có cú pháp có cấu trúc, đồng thời hỗ trợ con trỏ và truy cập bộ nhớ trực tiếp (đôi khi được gọi là trung cấp)."
+      },
+      {
+        id: 13,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Vì sao ngôn ngữ C được dùng phổ biến trong kỹ thuật và hệ thống nhúng?",
+        options: [
+          "A. C luôn tự động tìm được thuật toán tối ưu.",
+          "B. C chỉ chạy trên máy tính cá nhân.",
+          "C. C cho phép viết chương trình hiệu quả và kiểm soát tài nguyên.",
+          "D. C không cần kiểu dữ liệu."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> C cho phép thao tác bit, con trỏ và trực tiếp can thiệp thanh ghi/bộ nhớ với chi phí runtime tối thiểu."
+      },
+      {
+        id: 14,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Điểm nào sau đây KHÔNG PHẢI là ưu điểm nổi bật của ngôn ngữ lập trình C?",
+        options: [
+          "A. Hỗ trợ lập trình có cấu trúc và chia chương trình thành các hàm.",
+          "B. Hiệu năng thực thi cao, mã máy sau khi biên dịch rất gọn gàng và chạy rất nhanh.",
+          "C. Tự động thu hồi bộ nhớ rác (Automatic Garbage Collection) và cơ chế hướng đối tượng tích hợp sẵn.",
+          "D. Kích thước runtime nhỏ gọn, rất phù hợp cho hệ thống nhúng và hệ điều hành."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Ngôn ngữ C quản lý bộ nhớ thủ công qua malloc/free, không có bộ thu gom rác tự động (Garbage Collector) và không có OOP nguyên bản."
+      },
+      {
+        id: 15,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Trong quá trình xây dựng chương trình C, thành phần nào có nhiệm vụ kết hợp các tệp mã đối tượng (object files .o/.obj) và các thư viện liên kết để tạo ra tệp thực thi cuối cùng (.exe)?",
+        options: ["A. Code Editor", "B. Compiler", "C. Linker (Trình liên kết)", "D. Debugger"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Linker nhận các object file và thư viện tĩnh/động để giải quyết các tham chiếu biểu tượng và tạo ra file thực thi (.exe)."
+      },
+
+      // PHẦN 2: KIỂU DỮ LIỆU, TOÁN TỬ VÀ NHẬP XUẤT
+      {
+        id: 16,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Trong C, sizeof(char) bằng bao nhiêu byte của C?",
+        options: ["A. 0 byte.", "B. 1 byte; mỗi byte có ít nhất 8 bit.", "C. Luôn 4 byte.", "D. Luôn 2 byte."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Theo tiêu chuẩn C, sizeof(char) luôn luôn được định nghĩa bằng 1."
+      },
+      {
+        id: 17,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Trong chuẩn C99, kiểu dữ liệu logic _Bool được giới thiệu. Khi gán giá trị nguyên 25 cho một biến kiểu _Bool x = 25; giá trị thực tế được lưu trong biến x là gì?",
+        options: ["A. 25", "B. 1 (TRUE)", "C. 0 (FALSE)", "D. Tràn bộ nhớ và gây lỗi biên dịch."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Với kiểu _Bool, bất kỳ giá trị khác 0 nào khi gán vào biến sẽ tự động chuyển đổi thành 1."
+      },
+      {
+        id: 18,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Thành phần nào sau đây là từ khóa trong C?",
+        options: ["A. sensor_value", "B. printf", "C. main", "D. while"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> 'while' là từ khóa bảo lưu (keyword) trong chuẩn C. 'main' và 'printf' chỉ là các định danh/hàm tiêu chuẩn."
+      },
+      {
+        id: 19,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Tên định danh (Identifier) nào sau đây là HỢP LỆ trong ngôn ngữ lập trình C?",
+        options: ["A. 7_total_sum", "B. my-variable", "C. default", "D. sensor_value1"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Tên hợp lệ chỉ gồm chữ cái, số và dấu gạch dưới, không bắt đầu bằng số và không trùng từ khóa ('default' là từ khóa, '7_' bắt đầu bằng số, '-' là dấu trừ)."
+      },
+      {
+        id: 20,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Với biến, phát biểu nào phân biệt đúng khai báo và định nghĩa trong C?",
+        options: [
+          "A. Mọi khai báo đều không thông báo kiểu dữ liệu.",
+          "B. Định nghĩa cũng là khai báo và tạo đối tượng; extern int x; có thể chỉ khai báo đối tượng đã được định nghĩa ở nơi khác.",
+          "C. Chỉ biến cục bộ mới có định nghĩa.",
+          "D. Khai báo biến chỉ thực hiện lúc chạy."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Định nghĩa (Definition) cấp phát vùng nhớ cho biến; còn khai báo extern chỉ thông báo cho trình biên dịch về tên và kiểu."
+      },
+      {
+        id: 21,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho int n = 12; câu lệnh nào in giá trị của n dưới dạng số nguyên?",
+        options: ["A. printf(\"%f\", n);", "B. printf(\"%d\", n);", "C. printf(\"n\");", "D. printf(\"%c\", n);"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Định dạng %d (hoặc %i) dùng để in số nguyên có dấu."
+      },
+      {
+        id: 22,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho đoạn mã:<pre>char c = 'A';\nprintf(\"%d, %c\", c, c);</pre>Giả sử hệ thống dùng ASCII, mã của A là 65. Kết quả là gì?",
+        options: ["A. 65, A", "B. A, 65", "C. 65, 65", "D. A, A"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> %d in mã số nguyên ASCII (65), %c in ký tự tương ứng ('A')."
+      },
+      {
+        id: 23,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Phát biểu nào sau đây phân biệt ĐÚNG giữa tiền tố ++a và hậu tố a++?",
+        options: [
+          "A. ++a trả về giá trị cũ, còn a++ trả về giá trị mới.",
+          "B. a++ cho giá trị trước khi tăng; ++a cho giá trị sau khi tăng.",
+          "C. Cả hai luôn làm tăng a lên 2.",
+          "D. a++ không thay đổi a."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> a++ (hậu tố) trả về giá trị hiện tại trước rồi mới tăng; ++a (tiền tố) tăng a trước rồi trả về giá trị sau tăng."
+      },
+      {
+        id: 24,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho đoạn mã:<pre>int a = 3;\nint b = a++;\nb += ++a * 2;\nb -= --a;\nprintf(\"%d\", b);</pre>Giá trị in ra của b là bao nhiêu?",
+        options: ["A. 10", "B. 11", "C. 12", "D. 9"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b><br>1) b = a++: b = 3, sau đó a thành 4.<br>2) b += ++a * 2: a tăng thành 5, b = 3 + 5*2 = 13.<br>3) b -= --a: a giảm thành 4, b = 13 - 4 = 9."
+      },
+      {
+        id: 25,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho int a = 7, b = 3; giá trị của a % b là bao nhiêu?",
+        options: ["A. 2", "B. 3", "C. 0", "D. 1"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> 7 chia 3 được 2 dư 1. Phép toán % lấy phần dư nên kết quả là 1."
+      },
+      {
+        id: 26,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho int a = 2, b = 3; giá trị của a + b * 4 là bao nhiêu?",
+        options: ["A. 20", "B. 14", "C. 24", "D. 10"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Toán tử nhân (*) ưu tiên hơn cộng (+): 3 * 4 = 12; 2 + 12 = 14."
+      },
+      {
+        id: 27,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho đoạn mã sau:<pre>int n = 5;\ndouble x = (n > 3 ? n / 2 : n * 2.0);\nprintf(\"%.1f\", x);</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 2.5", "B. 10.0", "C. 3.0", "D. 2.0"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> n > 3 là đúng. Biểu thức n / 2 là phép chia 2 số nguyên int (5 / 2 = 2). Sau đó 2 được ép sang double thành 2.0."
+      },
+      {
+        id: 28,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Trong ngôn ngữ C, toán tử dấu phẩy (comma operator ,) có cơ chế hoạt động như thế nào trong biểu thức (expr1, expr2)?",
+        options: [
+          "A. Tính toán expr2 trước, sau đó tính expr1, kết quả trả về là kiểu và giá trị của expr1.",
+          "B. Tính toán expr1 từ trái sang phải, sau đó tính expr2; kết quả của toàn bộ biểu thức là kiểu và giá trị của biểu thức bên phải nhất (expr2).",
+          "C. Tính đồng thời cả 2 biểu thức và trả về giá trị trung bình cộng.",
+          "D. So sánh logic hai biểu thức và trả về 1 nếu cả hai cùng đúng."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Toán tử phẩy đánh giá từ trái sang phải và trả về giá trị của toán hạng bên phải nhất."
+      },
+      {
+        id: 29,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Từ khóa định phẩm const áp dụng cho một biến có ý nghĩa kỹ thuật là gì?",
+        options: [
+          "A. Biến const bắt buộc lưu trong ROM.",
+          "B. Biến const luôn có phạm vi toàn cục.",
+          "C. const tự động đổi biến sang kiểu float.",
+          "D. Không được gán lại giá trị qua tên biến đã khai báo const."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> const làm cho định danh biến trở thành 'read-only', không thể gán lại trực tiếp qua tên biến đó."
+      },
+      {
+        id: 30,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho int x = 5; giá trị của biểu thức x > 0 && x < 10 là bao nhiêu?",
+        options: ["A. 5", "B. 1", "C. 0", "D. 10"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> (5 > 0) là 1 (Đúng), (5 < 10) là 1 (Đúng). Phép toán logic 1 && 1 trả về 1."
+      },
+      {
+        id: 31,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho đoạn mã sau:<pre>int a = 5, b = 2;\nfloat c1 = a / b;\nfloat c2 = (float)a / b;\nprintf(\"%.1f %.1f\", c1, c2);</pre>Kết quả in ra màn hình lần lượt là:",
+        options: ["A. 2.0 2.5", "B. 2.5 2.5", "C. 2.5 2.0", "D. 2 2.5"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> a / b là chia nguyên (5/2 = 2), gán cho float thành 2.0. (float)a / b ép kiểu sang số thực nên thành 2.5."
+      },
+      {
+        id: 32,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Đoạn khai báo biến nào sau đây sẽ GÂY RA LỖI BIÊN DỊCH (Compilation error) trong C?",
+        options: [
+          "A. int valid_name = 10;",
+          "B. int 7x = 10;",
+          "C. const int a = 5;",
+          "D. unsigned char byte_val = 200;"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Tên biến trong C không được phép bắt đầu bằng một chữ số (7x là sai quy tắc cú pháp)."
+      },
+      {
+        id: 33,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho đoạn code sau:<pre>int x = 2, y = 0;\nchar kt = !y || (x && y);\nprintf(\"%d\", kt);</pre>Kết quả in ra là:",
+        options: ["A. 0", "B. 2", "C. 1", "D. -1"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> y = 0 nên !y = 1. Do toán tử || ngắn mạch (short-circuit), khi vế trái là 1 thì kết quả là 1 ngay lập tức."
+      },
+
+      // PHẦN 3: ĐIỀU KIỆN VÀ LƯU ĐỒ THUẬT TOÁN
+      {
+        id: 34,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong ngôn ngữ lập trình C, một câu lệnh hợp thành (compound statement hoặc block statement) được xác định bởi đặc điểm nào?",
+        options: [
+          "A. Một biểu thức không có dấu chấm phẩy.",
+          "B. Câu lệnh bắt buộc chứa if.",
+          "C. Một khối nằm trong cặp { }, có thể chứa khai báo và câu lệnh hoặc để trống.",
+          "D. Một câu lệnh có ít nhất ba toán tử."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Khối lệnh hợp thành là một nhóm các câu lệnh được bao bọc bên trong cặp ngoặc nhọn { }."
+      },
+      {
+        id: 35,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Cho đoạn mã nguồn sau:<pre>int b = 10;\nif (b < 0)\n    printf(\"%d\", b);\nprintf(\" is negative\\n\");</pre>Kết quả khi thực thi là gì?",
+        options: [
+          "A. Không in gì ra màn hình.",
+          "B. Báo lỗi biên dịch vì câu lệnh if thiếu cặp ngoặc {}.",
+          "C. Chỉ in ra chuỗi ' is negative\\n' do lệnh printf thứ hai nằm ngoài phạm vi của if.",
+          "D. In ra chuỗi '10 is negative\\n'."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> if không có cặp dấu ngoặc {} thì chỉ kiểm soát 1 lệnh duy nhất kế tiếp. Lệnh printf thứ hai luôn luôn được thực thi."
+      },
+      {
+        id: 36,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Khi sử dụng cấu trúc switch-case trong C, biểu thức điều kiện bên trong switch(expr) bắt buộc phải trả về kiểu dữ liệu nào?",
+        options: [
+          "A. Bắt buộc phải là kiểu số thực float hoặc double.",
+          "B. Kiểu số nguyên (integer) hoặc kiểu ký tự (char).",
+          "C. Bất kỳ kiểu dữ liệu nào kể cả chuỗi ký tự (string) và mảng.",
+          "D. Kiểu số thực double."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Biểu thức trong switch bắt buộc phải thuộc kiểu số nguyên (integral types) bao gồm int, char, enum, short, long."
+      },
+      {
+        id: 37,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong switch, sau các lệnh của case đang thực thi, khi nào điều khiển có thể đi tiếp sang case kế tiếp (fall-through)?",
+        options: [
+          "A. Khi không có case nào khớp.",
+          "B. Khi switch có hơn hai case.",
+          "C. Chỉ khi có default.",
+          "D. Khi không có lệnh chuyển điều khiển như break, return hoặc goto ngăn việc đi tiếp."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Hiện tượng fall-through xảy ra khi một case không có break hoặc return ở cuối, luồng chạy sẽ tiếp tục rơi xuống case tiếp theo."
+      },
+      {
+        id: 38,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Cho đoạn mã sau:<pre>int a = 2;\nswitch(a) {\n    case 1: printf(\"1 \");\n    case 2: printf(\"2 \");\n    case 3: printf(\"3 \");\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 2", "B. 1 2 3", "C. 2 3 ", "D. Lỗi biên dịch vì thiếu break."],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> a = 2 khớp case 2, in '2 '. Do không có break, luồng chạy tiếp tục rơi xuống case 3 và in '3 '."
+      },
+      {
+        id: 39,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Cho int x = 2; switch không có case 2 nhưng có nhánh default: printf(\"D\"); break;. Nhánh nào được thực hiện?",
+        options: [
+          "A. Nhánh default và in D.",
+          "B. Case đầu tiên bất kể giá trị.",
+          "C. Không thực hiện nhánh nào.",
+          "D. Báo lỗi biên dịch."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Khi không có nhãn case nào khớp với giá trị biểu thức, nhánh default sẽ được thực thi."
+      },
+      {
+        id: 40,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong lưu đồ thuật toán (Flowchart), hình khối nào sau đây được quy ước chuẩn để biểu diễn thao tác Rẽ nhánh điều kiện (Decision)?",
+        options: ["A. Hình thoi (Diamond)", "B. Hình chữ nhật (Rectangle)", "C. Hình bình hành (Parallelogram)", "D. Hình oval / elip (Terminator)"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Hình thoi biểu diễn điều kiện phân nhánh (Decision, rẽ 2 nhánh Đúng/Sai)."
+      },
+      {
+        id: 41,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong lưu đồ thuật toán, hình bình hành (Parallelogram) dùng để mô tả thao tác nào?",
+        options: [
+          "A. Bắt đầu hoặc kết thúc chương trình (Start/End).",
+          "B. Nhập hoặc xuất dữ liệu (Input/Output).",
+          "C. Thực hiện một hành động xử lý tính toán (Process/Action).",
+          "D. Điểm nối trang (Connector)."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Hình bình hành là ký hiệu chuẩn dùng cho thao tác Nhập/Xuất (I/O)."
+      },
+      {
+        id: 42,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Quy ước điều khiển nhiệt độ: dưới 18°C bật sưởi, tắt quạt; trên 28°C bật quạt, tắt sưởi; từ 18°C đến 28°C tắt cả hai. Ở 22°C, trạng thái là gì?",
+        options: [
+          "A. heater = 0 (OFF), cooling_fan = 0 (OFF)",
+          "B. heater = 1 (ON), fan = 0 (OFF)",
+          "C. heater = 0 (OFF), cooling_fan = 1 (ON)",
+          "D. heater = 1 (ON), cooling_fan = 1 (ON)"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> 22°C nằm trong khoảng từ 18°C đến 28°C nên cả quạt và sưởi đều tắt (heater = 0, fan = 0)."
+      },
+      {
+        id: 43,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Quy định của bài toán nhà kính: manual_override = 1 là yêu cầu dừng khẩn cấp, ưu tiên hơn mọi điều kiện cảm biến. Cách xử lý đúng là gì?",
+        options: [
+          "A. Nếu độ ẩm DRY thì bắt buộc phải bật máy bơm nước dù có chuyện gì xảy ra.",
+          "B. Nếu công tắc khẩn cấp manual_override == 1, tất cả các đầu ra (heater, cooling_fan, water_pump) đều phải lập tức tắt về 0.",
+          "C. Nếu nhiệt độ vượt 50°C thì quạt và máy sưởi cùng bật.",
+          "D. Hệ thống luôn chạy ở chế độ tự động và không thể can thiệp bằng tay."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Tín hiệu an toàn khẩn cấp (override) luôn có độ ưu tiên cao nhất, lập tức vô hiệu hóa mọi cơ cấu chấp hành."
+      },
+      {
+        id: 44,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Quy định băng chuyền: e_stop = 1 nghĩa là nút dừng khẩn cấp đã nhả; jam_sensor = 0 nghĩa là không kẹt hàng. Nếu không xét điều kiện khác, động cơ được phép chạy khi nào?",
+        options: [
+          "A. Nút dừng khẩn cấp đang bị nhấn (e_stop = 0) HOẶC có vật kẹt (jam_sensor = 1).",
+          "B. Nút dừng khẩn cấp được nhả (e_stop == 1 Safe) VÀ cảm biến kẹt hàng không báo lỗi (jam_sensor == 0 Clear).",
+          "C. Chỉ cần nhấn nút start_button bất chấp trạng thái cảm biến kẹt hàng.",
+          "D. Đèn báo động (alarm_light) đang nhấp nháy đỏ."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Điều kiện an toàn để động cơ vận hành là: Nút dừng khẩn cấp đã nhả (e_stop == 1) VÀ không có lỗi kẹt băng tải (jam_sensor == 0)."
+      },
+      {
+        id: 45,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Quy định băng chuyền: khi jam_sensor == 1, phải dừng động cơ và bật đèn báo. Cặp lệnh nào thực hiện đúng yêu cầu?",
+        options: [
+          "A. Dừng động cơ ngay lập tức (motor_run = 0) và bật đèn báo động đỏ (alarm_light = 1).",
+          "B. Tăng tốc độ động cơ để đẩy vật kẹt ra.",
+          "C. Chờ trong 10 giây xem vật kẹt có tự trôi qua không.",
+          "D. Ngắt nguồn cấp cho cảm biến kẹt hàng."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Khi xảy ra kẹt hàng, động cơ phải dừng ngay lập tức (motor_run = 0) và phát cảnh báo qua đèn (alarm_light = 1)."
+      },
+      {
+        id: 46,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Quy định xi-nhan: hazard_switch == 1 phải bật nhấp nháy cả hai bên, ưu tiên hơn cần gạt và khóa điện. Nhánh nào cần được xét trước?",
+        options: [
+          "A. Khi gạt cần rẽ trái thì đèn xi-nhan phải phải bật.",
+          "B. Đèn rẽ chỉ hoạt động khi tắt khóa điện xe (power_switch == 0).",
+          "C. Khi công tắc cảnh báo khẩn cấp (hazard_switch == 1) được bật, cả hai đèn xi-nhan trái và phải đều phải bật nhấp nháy bất chấp vị trí cần gạt và trạng thái khóa điện.",
+          "D. Đèn báo khẩn cấp chỉ được phép hoạt động khi xe đang chạy trên 40km/h."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Công tắc Hazard là chức năng an toàn tối cao trên xe, luôn được ưu tiên xử lý trước mọi trạng thái công tắc khác."
+      },
+      {
+        id: 47,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Cho đoạn mã phân loại tam giác từ 3 cạnh a, b, c nhập vào. Điều kiện nào sau đây là điều kiện tiên quyết CẦN VÀ ĐỦ để 3 số thực dương a, b, c có thể tạo thành một tam giác hợp lệ?",
+        options: [
+          "A. a + b > c",
+          "B. a*a + b*b == c*c",
+          "C. (a + b > c) && (a + c > b) && (b + c > a)",
+          "D. (a == b) || (b == c) || (c == a)"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Bất đẳng thức tam giác yêu cầu tổng 2 cạnh bất kỳ luôn lớn hơn cạnh còn lại: a+b>c và a+c>b và b+c>a."
+      },
+      {
+        id: 48,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong lưu đồ của vòng lặp while, sau khi thực hiện thân lặp, mũi tên phải quay về đâu?",
+        options: [
+          "A. Khối kết thúc.",
+          "B. Khối nhập đầu tiên trong mọi bài toán.",
+          "C. Khối kiểm tra điều kiện lặp.",
+          "D. Khối bắt đầu chương trình."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Vòng lặp while kiểm tra điều kiện trước mỗi lượt lặp, do đó sau khi chạy xong thân lặp, luồng điều khiển phải quay về khối kiểm tra điều kiện."
+      },
+      {
+        id: 49,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Cho đoạn code sau:<pre>int score = 85;\nif (score >= 90) printf(\"A\");\nelse if (score >= 80) printf(\"B\");\nelse if (score >= 70) printf(\"C\");\nelse printf(\"D\");</pre>Kết quả in ra là gì?",
+        options: ["A. B", "B. A", "C. B C D", "D. C"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> score = 85 không thỏa điều kiện >= 90, nhưng thỏa điều kiện thứ hai (85 >= 80) nên in 'B' và thoát cấu trúc if-else."
+      },
+
+      // PHẦN 4: VÒNG LẶP VÀ ĐIỀU KHIỂN LUỒNG
+      {
+        id: 50,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Điểm khác biệt cơ bản nhất giữa vòng lặp while và vòng lặp do-while trong C là gì?",
+        options: [
+          "A. while kiểm tra điều kiện sau khi thực hiện thân lặp; do-while kiểm tra trước.",
+          "B. while kiểm tra điều kiện trước (pre-test); do-while kiểm tra điều kiện sau (post-test) nên thân vòng lặp luôn được thực thi ít nhất một lần.",
+          "C. while không cho phép sử dụng câu lệnh break, trong khi do-while cho phép.",
+          "D. do-while chỉ dùng được với các biến kiểu số nguyên."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> do-while thực thi khối lệnh trước rồi mới kiểm tra điều kiện ở cuối (post-test), do đó thân lặp luôn chạy ít nhất 1 lần."
+      },
+      {
+        id: 51,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau:<pre>int i = 10;\nwhile (i < 5) {\n    printf(\"%d \", i);\n    i++;\n}</pre>Số lần thân vòng lặp được thực thi là bao nhiêu?",
+        options: ["A. 1 lần", "B. 5 lần", "C. Vô hạn lần", "D. 0 lần"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Ban đầu i = 10, điều kiện (10 < 5) là sai (FALSE) ngay từ lần đầu nên thân vòng lặp không được thực thi lần nào (0 lần)."
+      },
+      {
+        id: 52,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau sử dụng do-while:<pre>int i = 10;\ndo {\n    printf(\"%d \", i);\n    i++;\n} while (i < 5);</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. Không in ra gì cả.", "B. 10 ", "C. 10 11", "D. Lỗi thời gian chạy (runtime error)."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> do-while thực hiện thân lặp trước, in ra '10 ' rồi tăng i lên 11. Kiểm tra điều kiện (11 < 5) là sai nên kết thúc."
+      },
+      {
+        id: 53,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Trong cấu trúc vòng lặp for (Biểu_thức_1; Biểu_thức_2; Biểu_thức_3), trình tự thực hiện các biểu thức trong mỗi lần lặp diễn ra như thế nào?",
+        options: [
+          "A. Khởi tạo Biểu_thức_1 một lần duy nhất -> Kiểm tra Biểu_thức_2 -> Thực thi thân vòng lặp (nếu đúng) -> Thực thi Biểu_thức_3 -> Lặp lại bước kiểm tra Biểu_thức_2.",
+          "B. Thực hiện Biểu_thức_1 -> Biểu_thức_2 -> Biểu_thức_3 -> Thực thi thân vòng lặp.",
+          "C. Mỗi lần lặp đều khởi tạo lại Biểu_thức_1.",
+          "D. Biểu thức 3 được thực hiện trước khi kiểm tra Biểu thức 2."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Chu trình vòng lặp for: Init (1 lần) -> Check Condition -> Execute Body -> Update/Increment -> Check Condition."
+      },
+      {
+        id: 54,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Từ tiêu chuẩn C99 trở đi, việc khai báo biến lặp trực tiếp bên trong biểu thức khởi tạo của vòng lặp for (int i = 0; i < n; i++) có đặc điểm phạm vi (scope) như thế nào?",
+        options: [
+          "A. Biến i có phạm vi toàn cục trong cả tệp mã nguồn.",
+          "B. Biến i vẫn tồn tại và truy xuất bình thường sau khi vòng lặp kết thúc trong toàn bộ hàm chứa nó.",
+          "C. Biến i chỉ có phạm vi cục bộ bên trong cấu trúc vòng lặp for đó và bị hủy khi vòng lặp kết thúc.",
+          "D. Cú pháp này không hợp lệ và gây lỗi biên dịch."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Trong C99/C11, biến khai báo trong mệnh đề init của for có phạm vi khối (block scope) giới hạn trong chính vòng lặp đó."
+      },
+      {
+        id: 55,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Câu lệnh break khi được gọi bên trong một vòng lặp sẽ thực hiện hành động nào?",
+        options: [
+          "A. Thoát ngay lập tức khỏi khối vòng lặp sâu nhất đang chứa nó và tiếp tục thực hiện câu lệnh đứng sau vòng lặp.",
+          "B. Bỏ qua lần lặp hiện tại và nhảy tới lần lặp kế tiếp.",
+          "C. Kết thúc toàn bộ hàm hiện tại và trả về giá trị 0.",
+          "D. Tạm dừng chương trình trong 1 giây."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> break dùng để kết thúc sớm và thoát khỏi vòng lặp (hoặc switch) gần nhất chứa nó."
+      },
+      {
+        id: 56,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Khi gặp câu lệnh continue bên trong vòng lặp for, điều khiển chương trình sẽ chuyển ngay tới đâu?",
+        options: [
+          "A. Thoát hẳn ra khỏi vòng lặp for.",
+          "B. Bỏ qua các câu lệnh còn lại trong thân vòng lặp của lần lặp hiện tại và nhảy tới biểu thức cập nhật (Biểu_thức_3), sau đó quay lại kiểm tra điều kiện lặp.",
+          "C. Quay về biểu thức khởi tạo (Biểu_thức_1).",
+          "D. Khởi động lại toàn bộ chương trình từ hàm main()."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> continue bỏ qua phần còn lại của thân lặp hiện tại và chuyển trực tiếp tới bước cập nhật (expression 3) của vòng for."
+      },
+      {
+        id: 57,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau:<pre>int n;\nfor (n = 3; n <= 9; n += 3) {\n    printf(\"%d \", n);\n    if (n == 6) break;\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 3 6 9", "B. 3", "C. 3 6 ", "D. 6"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Lần 1: n = 3, in '3 '. Lần 2: n = 6, in '6 ', sau đó n == 6 thỏa mãn dẫn đến lệnh break kết thúc vòng lặp."
+      },
+      {
+        id: 58,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau:<pre>for (int i = 0; i < 5; i++) {\n    if (i == 3) continue;\n    printf(\"%d \", i + 1);\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 1 2 3 4 5", "B. 1 2 4 5", "C. 1 2 3 5", "D. 1 2 3"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Các giá trị i lần lượt:<br>i = 0 in 1; i = 1 in 2; i = 2 in 3; i = 3 bị continue bỏ qua (không in 4); i = 4 in 5. Kết quả là 1 2 3 5."
+      },
+      {
+        id: 59,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau sử dụng do-while và continue:<pre>int i = 1;\ndo {\n    if (i % 3 == 0) {\n        i++;\n        continue;\n    }\n    printf(\"%d \", i);\n    i++;\n} while (i <= 7);</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 1 2 4 5 7 ", "B. 1 2 3 4 5 6 7", "C. 1 2 4 5", "D. 1 2 4 5 6 7"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Các giá trị chia hết cho 3 (3 và 6) bị tăng lên và nhảy continue nên không được in. Kết quả in ra là các số không chia hết cho 3: 1 2 4 5 7."
+      },
+      {
+        id: 60,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã sau giải bài toán giả thuyết Collatz (n chẵn: n=n/2; n lẻ: n=3*n+1):<pre>int n = 6, count = 0;\nwhile (n != 1) {\n    if (n % 2 == 0) n = n / 2;\n    else n = 3 * n + 1;\n    count++;\n    if (n == 5) break;\n}\nprintf(\"%d\", count);</pre>Kết quả in ra là gì?",
+        options: ["A. 3", "B. 4", "C. 5", "D. 8"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b><br>Lần 1: n = 6 -> n = 3, count = 1.<br>Lần 2: n = 3 -> n = 10, count = 2.<br>Lần 3: n = 10 -> n = 5, count = 3.<br>Khi n == 5 gặp lệnh break dừng vòng lặp, in count = 3."
+      },
+      {
+        id: 61,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã hai vòng lặp lồng nhau sau:<pre>int total = 0;\nfor (int i = 1; i <= 3; i++) {\n    for (int j = 1; j <= 4; j++) {\n        if ((i + j) % 3 == 0)\n            break;\n        total++;\n    }\n}\nprintf(\"%d\", total);</pre>Giá trị in ra của total là bao nhiêu?",
+        options: ["A. 3", "B. 12", "C. 5", "D. 6"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b><br>- i = 1: j=1 (total=1); j=2 (1+2=3 %3==0 break)<br>- i = 2: j=1 (2+1=3 %3==0 break)<br>- i = 3: j=1 (total=2); j=2 (total=3); j=3 (3+3=6 %3==0 break).<br>Tổng cộng total = 3."
+      },
+      {
+        id: 62,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã:<pre>int sum = 0;\nfor (int i = 1; i <= 4; i++)\n    sum += i;\nprintf(\"%d\", sum);</pre>Kết quả in ra là gì?",
+        options: ["A. 10", "B. 4", "C. 6", "D. 15"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> sum = 1 + 2 + 3 + 4 = 10."
+      },
+      {
+        id: 63,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Cho đoạn mã:<pre>int n = 1204, count = 0;\ndo {\n    count++;\n    n /= 10;\n} while (n != 0);\nprintf(\"%d\", count);</pre>Kết quả in ra là gì?",
+        options: ["A. 4", "B. 3", "C. 5", "D. 1204"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Đoạn mã đếm số lượng chữ số của 1204. Các bước chia 10: 120 -> 12 -> 1 -> 0 (4 bước, count = 4)."
+      },
+      {
+        id: 64,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Câu lệnh goto trong C có giới hạn phạm vi chuyển điều khiển (scope) như thế nào?",
+        options: [
+          "A. Có thể nhảy tự do đến bất kỳ nhãn nào trong toàn bộ dự án.",
+          "B. Chỉ được phép nhảy về phía trước, không thể nhảy ngược về phía sau.",
+          "C. Chỉ có thể nhảy đến nhãn nằm trong cùng một hàm (function scope); không thể nhảy xuyên qua giữa các hàm khác nhau.",
+          "D. Chỉ được sử dụng bên trong các khối lệnh switch."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Nhãn (label) trong C có phạm vi hàm (function scope), do đó goto chỉ có thể nhảy bên trong cùng một thân hàm."
+      },
+      {
+        id: 65,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Câu lệnh rỗng (Null statement) trong ngôn ngữ C được biểu diễn bằng ký hiệu nào sau đây?",
+        options: ["A. NULL;", "B. void;", "C. {}", "D. Duy nhất một dấu chấm phẩy (;)."],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Câu lệnh rỗng trong C chỉ bao gồm một dấu chấm phẩy đơn độc (;), thường dùng trong các vòng lặp chờ."
+      },
+      {
+        id: 66,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Phát biểu nào đúng về hai đoạn mã for (;;); và while (1);?",
+        options: [
+          "A. Chỉ for (;;); là vòng lặp vô tận.",
+          "B. Chỉ while (1); là vòng lặp vô tận.",
+          "C. Cả hai đều kết thúc sau một lượt.",
+          "D. Cả hai đều tạo vòng lặp vô tận vì không có điều kiện dừng hoặc break."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Cả hai cấu trúc đều là các cú pháp tiêu chuẩn tạo vòng lặp vô hạn (infinite loop) trong C."
+      },
+      {
+        id: 67,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Một năm dương lịch được xác định là năm nhuận (Leap Year) khi thỏa mãn điều kiện logic nào sau đây trong C?",
+        options: [
+          "A. (year % 4 == 0)",
+          "B. (year % 100 == 0 && year % 400 != 0)",
+          "C. (year % 4 == 0) || (year % 100 == 0)",
+          "D. (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)"
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Quy tắc năm nhuận: Chia hết cho 4 nhưng không chia hết cho 100, HOẶC chia hết cho 400."
+      },
+
+      // PHẦN 5: HÀM, PHẠM VI BIẾN VÀ TRUYỀN THAM SỐ
+      {
+        id: 68,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Mục đích quan trọng hàng đầu của việc sử dụng Hàm (Function) trong lập trình C là gì?",
+        options: [
+          "A. Làm cho chương trình chạy nhanh hơn so với viết toàn bộ mã trong main().",
+          "B. Giúp chia chương trình lớn thành các mô-đun nhỏ có chức năng rõ ràng, dễ phân tích, gỡ lỗi, bảo trì và tái sử dụng mã nguồn.",
+          "C. Tự động phân bổ lại bộ nhớ heap khi bị thiếu.",
+          "D. Bắt buộc phải có hàm phụ thì chương trình C mới biên dịch được."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Hàm hỗ trợ nguyên lý module hóa (modular programming), đóng gói và tái sử dụng mã nguồn hiệu quả."
+      },
+      {
+        id: 69,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Phát biểu nào sau đây phân biệt CHÍNH XÁC giữa Tham số hình thức (Parameter) và Đối số thực tế (Argument)?",
+        options: [
+          "A. Tham số là giá trị thực tế được truyền vào khi gọi hàm; đối số là biến đại diện khai báo trong định nghĩa hàm.",
+          "B. Cả hai khái niệm là một và hoàn toàn đồng nghĩa trong mọi chuẩn lập trình.",
+          "C. Tham số chỉ tồn tại trong hàm main(), còn đối số chỉ tồn tại trong hàm người dùng tự định nghĩa.",
+          "D. Tham số (Parameter) là biến đóng vai trò giữ chỗ được khai báo trong phần định nghĩa hàm; còn Đối số (Argument) là giá trị thực tế được truyền vào hàm khi thực hiện lời gọi hàm."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Parameter nằm ở phần định nghĩa hàm; Argument là giá trị hoặc biến thực tế được truyền khi gọi hàm."
+      },
+      {
+        id: 70,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Khai báo nguyên mẫu hàm (Function Prototype / Declaration) có tác dụng gì đối với trình biên dịch?",
+        options: [
+          "A. Thông báo trước cho trình biên dịch biết tên hàm, kiểu dữ liệu trả về và danh sách kiểu của các tham số để trình biên dịch kiểm tra tính hợp lệ khi gặp lời gọi hàm.",
+          "B. Cấp phát ngay lập tức bộ nhớ trên Stack cho các biến nội bộ của hàm.",
+          "C. Thực thi các lệnh bên trong thân hàm trước khi hàm main() chạy.",
+          "D. Tạo ra tệp thực thi độc lập cho hàm đó."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Prototype giúp trình biên dịch kiểm tra tính tương thích về kiểu và số lượng đối số khi gọi hàm trước khi hàm được định nghĩa."
+      },
+      {
+        id: 71,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cơ chế truyền tham số mặc định và duy nhất trong ngôn ngữ lập trình C đối với các kiểu dữ liệu cơ bản là cơ chế nào?",
+        options: [
+          "A. Truyền theo giá trị (Pass-by-value).",
+          "B. Truyền theo tham chiếu (Pass-by-reference).",
+          "C. Truyền theo tên gọi (Pass-by-name).",
+          "D. Truyền tự động theo tên hàm."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> C thuần túy chỉ có truyền theo giá trị (Pass-by-value). Việc 'truyền tham chiếu' trong C thực chất là truyền giá trị của con trỏ."
+      },
+      {
+        id: 72,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho đoạn mã hoán vị hai số sau:<pre>void swap(int a, int b) {\n    int temp = a;\n    a = b;\n    b = temp;\n}\nint main() {\n    int x = 5, y = 10;\n    swap(x, y);\n    printf(\"x=%d, y=%d\", x, y);\n    return 0;\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. x=10, y=5", "B. x=0, y=0", "C. Lỗi biên dịch tại lời gọi hàm swap.", "D. x=5, y=10"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Do hàm swap nhận bản sao giá trị (Pass-by-value), việc hoán đổi a và b bên trong hàm swap không làm thay đổi biến x và y trong main."
+      },
+      {
+        id: 73,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho hàm hoán vị: void swap(int a, int b) { int temp = a; a=b; b = temp; }. Khi gọi swap(x, y) trong hàm main(), nguyên nhân chính khiến giá trị của biến x và y không hề bị thay đổi sau khi hàm kết thúc là gì?",
+        options: [
+          "A. Do temp không được khai báo static.",
+          "B. Do swap trả về void.",
+          "C. a và b nhận bản sao giá trị; gán cho a, b chỉ sửa các tham số cục bộ, không sửa x, y.",
+          "D. Do mọi hàm đều không thể sửa dữ liệu."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Các tham số hình thức a và b là các biến cục bộ độc lập được cấp phát trên ngăn xếp của hàm swap và chỉ nhận bản sao dữ liệu của x và y."
+      },
+      {
+        id: 74,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Đối với một hàm được khai báo có kiểu trả về là void, điều nào sau đây là ĐÚNG?",
+        options: [
+          "A. Bắt buộc chứa return 0;.",
+          "B. Không thể nhận tham số.",
+          "C. Không được chứa return;.",
+          "D. Không trả về giá trị; có thể dùng return; để kết thúc hàm."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Hàm kiểu void không trả về giá trị biểu thức nào, nhưng có thể sử dụng câu lệnh 'return;' đơn lẻ để thoát hàm sớm."
+      },
+      {
+        id: 75,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Khi phân tích khả năng truy cập và sự tồn tại của một biến trong C, cần xét cặp khái niệm nào?",
+        options: [
+          "A. Kích thước biến (Size) và Tên biến (Name).",
+          "B. Giá trị ban đầu (Initial value) và Giá trị kết thúc (Final value).",
+          "C. Phạm vi tác dụng (Scope) và Thời gian sống (Lifetime).",
+          "D. Tốc độ truy xuất (Speed) và Dung lượng bộ nhớ (Capacity)."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Scope (phạm vi nhìn thấy/truy cập biến) và Lifetime (thời gian tồn tại của biến trong bộ nhớ) là hai khái niệm nền tảng."
+      },
+      {
+        id: 76,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Trong mô hình ngăn xếp lời gọi hàm, main() gọi f(), rồi f() gọi g(). Khi g() kết thúc bình thường, chương trình tiếp tục ở đâu?",
+        options: [
+          "A. Đầu main().",
+          "B. Đầu g().",
+          "C. Cuối main().",
+          "D. Trong f(), ngay sau lời gọi g()."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Địa chỉ quay về (return address) lưu trên Stack Frame trỏ đến câu lệnh kế tiếp ngay sau lời gọi g() trong hàm f()."
+      },
+      {
+        id: 77,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Trong mô hình ngăn xếp lời gọi hàm, hai lần gọi lồng nhau của cùng một hàm có biến cục bộ tự động x. Phát biểu nào đúng?",
+        options: [
+          "A. Luôn dùng chung một biến x.",
+          "B. Mỗi lần gọi có đối tượng x riêng.",
+          "C. x tự trở thành biến toàn cục.",
+          "D. x giữ giá trị giữa mọi lần gọi như biến static."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Mỗi lần gọi hàm tạo ra một Stack Frame riêng biệt, do đó mỗi khung ngăn xếp sở hữu một biến cục bộ x hoàn toàn độc lập."
+      },
+      {
+        id: 78,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Trong mô hình ngăn xếp dùng để giải thích lời gọi hàm, phát biểu nào đúng?",
+        options: [
+          "A. Luôn cần lập trình viên tự xóa từng bản ghi sau mỗi lời gọi.",
+          "B. Chỉ tồn tại trong ROM.",
+          "C. Lưu thông tin của các lời gọi đang hoạt động; lời gọi sau kết thúc trước theo LIFO.",
+          "D. Lưu duy nhất các biến toàn cục."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Call Stack hoạt động theo nguyên lý LIFO (Last In First Out): hàm được gọi sau cùng sẽ hoàn thành và được giải phóng trước."
+      },
+      {
+        id: 79,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho đoạn mã sau minh họa hiện tượng che khuất biến (Variable Shadowing):<pre>int a = 5;\nint main() {\n    int a = 10;\n    printf(\"%d\\n\", a);\n    return 0;\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 5", "B. 15", "C. Lỗi biên dịch do trùng tên biến a.", "D. 10"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Biến cục bộ trong phạm vi hẹp hơn sẽ che khuất (shadow) biến toàn cục cùng tên, nên printf in giá trị a cục bộ là 10."
+      },
+      {
+        id: 80,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Một biến cục bộ tự động kiểu int chưa được khởi tạo có đặc điểm nào?",
+        options: [
+          "A. Luôn tự khởi tạo bằng 0.",
+          "B. Tự suy ra kiểu dữ liệu như Python.",
+          "C. Có phạm vi toàn chương trình.",
+          "D. Có giá trị chưa xác định; cần gán giá trị trước khi dùng."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Biến tự động (automatic local variable) chứa giá trị rác ngẫu nhiên (indeterminate/garbage value) nếu chưa được khởi tạo."
+      },
+      {
+        id: 81,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Khi khai báo một biến cục bộ với từ khóa static bên trong một hàm (ví dụ: static int count = 0;), biến đó có đặc tính quan trọng nào?",
+        options: [
+          "A. Bị tạo mới và mất giá trị sau mỗi lần gọi.",
+          "B. Được truy cập trực tiếp bằng tên từ mọi hàm.",
+          "C. Chỉ được khởi tạo một lần và giữ giá trị giữa các lần gọi; tên vẫn có phạm vi cục bộ.",
+          "D. Không thể đổi giá trị."
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Biến static cục bộ lưu trong phân vùng tĩnh (BSS/Data segment), tồn tại suốt đời chương trình và duy trì giá trị qua các lần gọi hàm."
+      },
+      {
+        id: 82,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho hàm:<pre>int square(int x) {\n    return x * x;\n}</pre>Giá trị của square(3) + square(2) là bao nhiêu?",
+        options: ["A. 25", "B. 13", "C. 10", "D. 5"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> square(3) = 3*3 = 9; square(2) = 2*2 = 4. Tổng là 9 + 4 = 13."
+      },
+      {
+        id: 83,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho hàm:<pre>int increase(int x) {\n    return x + 1;\n}</pre>Sau các lệnh int a = 5; a = increase(a); giá trị của a là bao nhiêu?",
+        options: ["A. 5", "B. 6", "C. 1", "D. Lỗi biên dịch."],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Hàm trả về 5 + 1 = 6, sau đó giá trị 6 được gán lại vào biến a."
+      },
+      {
+        id: 84,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Cho đoạn mã sau:<pre>void counter() {\n    static int x = 0;\n    x++;\n    printf(\"%d \", x);\n}\nint main() {\n    for (int i = 0; i < 3; i++)\n        counter();\n    return 0;\n}</pre>Kết quả in ra màn hình là gì?",
+        options: ["A. 1 1 1 ", "B. 0 1 2 ", "C. 3 3 3 ", "D. 1 2 3 "],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Biến x là static nên giữ giá trị tích lũy qua mỗi lần gọi hàm counter(): lần 1 in 1, lần 2 in 2, lần 3 in 3."
+      },
+
+      // PHẦN 6: NGĂN XẾP VÀ ĐỆ QUY
+      {
+        id: 85,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Ngăn xếp (Stack) hoạt động theo nguyên tắc nào?",
+        options: ["A. FIFO: vào trước, ra trước.", "B. Các phần tử ra ngẫu nhiên.", "C. Phần tử nhỏ nhất ra trước.", "D. LIFO: vào sau, ra trước."],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Ngăn xếp (Stack) hoạt động theo nguyên lý LIFO (Last In First Out) - phần tử đưa vào sau cùng sẽ được lấy ra đầu tiên."
+      },
+      {
+        id: 86,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Theo mô hình ngăn xếp, main() gọi A(), A() gọi B(), B() gọi C(). Thứ tự kết thúc bình thường của ba hàm là gì?",
+        options: ["A. C, B, A.", "B. A, B, C.", "C. B, A, C.", "D. C, A, B."],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> C đẩy vào ngăn xếp sau cùng nên phải hoàn thành và rút ra trước, tiếp theo đến B, sau đó đến A."
+      },
+      {
+        id: 87,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Trong mô hình ngăn xếp lời gọi hàm, thao tác nào làm xuất hiện một bản ghi lời gọi (Stack Frame) mới?",
+        options: ["A. Khai báo một biến toàn cục.", "B. Kết thúc một vòng lặp.", "C. Gọi một hàm.", "D. In một dòng trống."],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Mỗi khi một lời gọi hàm diễn ra, một bản ghi hoạt động (Stack frame / Activation record) được đẩy lên đỉnh Stack."
+      },
+      {
+        id: 88,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Một biến cục bộ tự động thông thường được khai báo trong thân hàm có thời gian sống như thế nào?",
+        options: [
+          "A. Tồn tại vĩnh viễn sau khi hàm kết thúc.",
+          "B. Chỉ tồn tại khi biên dịch.",
+          "C. Luôn tồn tại như biến toàn cục.",
+          "D. Tồn tại trong lần thực thi khối chứa nó; kết thúc khi rời khối."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Biến tự động (automatic) được cấp phát khi đi vào khối lệnh và bị hủy tự động ngay khi rời khỏi khối lệnh đó."
+      },
+      {
+        id: 89,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm:<pre>int max2(int a, int b) {\n    if (a > b) return a;\n    return b;\n}</pre>Giá trị của max2(4, 9) là bao nhiêu?",
+        options: ["A. 9", "B. 4", "C. 13", "D. 0"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Điều kiện 4 > 9 sai nên hàm thực hiện lệnh 'return b;', trả về 9."
+      },
+      {
+        id: 90,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho đoạn mã:<pre>int f(int x) {\n    x = x + 2;\n    return x;\n}\nint main(void) {\n    int a = 3;\n    int b = f(a);\n    printf(\"%d %d\", a, b);\n    return 0;\n}</pre>Kết quả in ra là gì?",
+        options: ["A. 5 5", "B. 3 3", "C. 3 5", "D. 5 3"],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Trong hàm f(), biến x nhận bản sao của a nên tăng lên 5 và trả về b = 5. Biến a trong main() không đổi giá trị (vẫn bằng 3)."
+      },
+      {
+        id: 91,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Trong một hàm trả về int, câu lệnh return 7; có tác dụng gì?",
+        options: [
+          "A. Chỉ thoát vòng lặp gần nhất.",
+          "B. In số 7 ra màn hình.",
+          "C. Tiếp tục chạy các lệnh sau return trong hàm.",
+          "D. Kết thúc lần gọi hàm hiện tại và trả giá trị 7 cho nơi gọi."
+        ],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Lệnh return lập tức kết thúc việc thực thi hàm và chuyển giao giá trị trả về cho biểu thức gọi hàm."
+      },
+      {
+        id: 92,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Phát biểu nào sau đây định nghĩa CHÍNH XÁC về Hàm đệ quy (Recursive Function) trong ngôn ngữ C?",
+        options: [
+          "A. Là hàm gọi lại chính nó trực tiếp hoặc gián tiếp trong quá trình thực thi.",
+          "B. Là hàm không có giá trị trả về và không nhận bất kỳ tham số nào.",
+          "C. Là hàm chỉ chứa các vòng lặp while vô tận.",
+          "D. Là hàm được thực thi tự động ngay khi nạp tệp chương trình mà không cần gọi."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Đệ quy là kỹ thuật mà trong thân của một hàm có chứa lời gọi quay lại chính hàm đó (trực tiếp hoặc thông qua hàm trung gian)."
+      },
+      {
+        id: 93,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Để thiết kế hàm đệ quy kết thúc với đầu vào hợp lệ, cần bảo đảm điều gì?",
+        options: [
+          "A. Có trường hợp dừng và mỗi bước đệ quy tiến tới trường hợp dừng.",
+          "B. Có for và goto.",
+          "C. Có static và biến toàn cục.",
+          "D. Có switch và try-catch."
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Hai yếu tố cốt lõi của hàm đệ quy: Điều kiện dừng (Base case) và Bước đệ quy (Recursive step) thu hẹp bài toán về trường hợp dừng."
+      },
+      {
+        id: 94,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Hiện tượng 'Tràn ngăn xếp' (Stack Overflow) khi chạy một chương trình đệ quy thường bắt nguồn từ nguyên nhân kỹ thuật nào?",
+        options: [
+          "A. Do vòng lặp for có nhiều lần lặp nhưng không gọi hàm đệ quy.",
+          "B. Do thiếu điều kiện dừng (base case) hoặc đệ quy quá sâu khiến các khung ngăn xếp liên tục được đẩy vào Stack mà không được giải phóng, làm cạn kiệt bộ nhớ ngăn xếp.",
+          "C. Do khai báo biến toàn cục có kích thước quá lớn.",
+          "D. Do sử dụng sai định dạng trong hàm printf."
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Đệ quy vô hạn hoặc quá sâu làm số lượng khung ngăn xếp vượt quá giới hạn vùng nhớ Call Stack được hệ điều hành cấp phát."
+      },
+      {
+        id: 95,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm đệ quy tính số Fibonacci sau:<pre>int fib(int n) {\n    if (n <= 1) return n;\n    else return fib(n - 1) + fib(n - 2);\n}</pre>Giá trị trả về khi gọi fib(4) là bao nhiêu?",
+        options: ["A. 2", "B. 3", "C. 5", "D. 8"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b><br>fib(0)=0, fib(1)=1<br>fib(2) = 1 + 0 = 1<br>fib(3) = fib(2) + fib(1) = 1 + 1 = 2<br>fib(4) = fib(3) + fib(2) = 2 + 1 = 3."
+      },
+      {
+        id: 96,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm đệ quy tính tổng các chữ số của một số nguyên dương n:<pre>int sum_digits(int n) {\n    if (n == 0) return 0;\n    return (n % 10) + sum_digits(n / 10);\n}</pre>Giá trị trả về của sum_digits(12345) là bao nhiêu?",
+        options: ["A. 10", "B. 15", "C. 12", "D. 5"],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Tổng các chữ số: 5 + 4 + 3 + 2 + 1 + 0 = 15."
+      },
+      {
+        id: 97,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm tính giai thừa với n không âm:<pre>int fact(int n) {\n    if (n <= 1) return 1;\n    return n * fact(n - 1);\n}</pre>Giá trị của fact(4) là bao nhiêu?",
+        options: ["A. 4", "B. 12", "C. 16", "D. 24"],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> fact(4) = 4 * 3 * 2 * 1 = 24."
+      },
+      {
+        id: 98,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm tính tổng với n không âm:<pre>int sum_to(int n) {\n    if (n == 0) return 0;\n    return n + sum_to(n - 1);\n}</pre>Giá trị của sum_to(4) là bao nhiêu?",
+        options: ["A. 10", "B. 4", "C. 6", "D. 24"],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> sum_to(4) = 4 + 3 + 2 + 1 + 0 = 10."
+      },
+      {
+        id: 99,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm với n không âm:<pre>void show(int n) {\n    if (n == 0) return;\n    printf(\"%d \", n);\n    show(n - 1);\n}</pre>Khi gọi show(3), thứ tự in ra là gì?",
+        options: ["A. 3 2 1 ", "B. 1 2 3 ", "C. 3 3 3 ", "D. 0 1 2 3 "],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Lệnh printf đặt TRƯỚC lời gọi đệ quy (tiền thứ tự - pre-order), in n ngay lúc gọi: in 3, sau đó gọi show(2) in 2, gọi show(1) in 1."
+      },
+      {
+        id: 100,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cho hàm với n không âm:<pre>void show(int n) {\n    if (n == 0) return;\n    show(n - 1);\n    printf(\"%d \", n);\n}</pre>Khi gọi show(3), thứ tự in ra là gì?",
+        options: ["A. 3 2 1 ", "B. 3 3 3 ", "C. 0 1 2 3 ", "D. 1 2 3 "],
+        correct: 3,
+        explanation: "<b>Đáp án D:</b> Lệnh printf đặt SAU lời gọi đệ quy (hậu thứ tự - post-order), hàm đi sâu đến đáy (n=0) rồi mới quay lui in lần lượt: 1 2 3."
+      }
+    ];
+
+    // ==========================================
+    // 3. LOGIC HIỂN THỊ & XỬ LÝ SỰ KIỆN
+    // ==========================================
+   let currentMode = 'study';
+    let currentQuestions = [...rawQuizData];
+    let userAnswers = {};
+    let isExamSubmitted = false;
+    let timerInterval = null;
+    let timeLeft = 3600;
+    let activeFilter = 'all';
+
+    function initApp() {
+      loadSavedState();
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    }
+
+    function saveState() {
+      const data = {
+        currentMode,
+        userAnswers,
+        isExamSubmitted,
+        timeLeft,
+        activeFilter,
+        examQuestionIds: currentQuestions.map(q => q.id)
+      };
+      localStorage.setItem('ee2081_state', JSON.stringify(data));
+    }
+
+    function loadSavedState() {
+      if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+      const saved = localStorage.getItem('ee2081_state');
+      if (saved) {
+        try {
+          const d = JSON.parse(saved);
+          currentMode = d.currentMode || 'study';
+          userAnswers = d.userAnswers || {};
+          isExamSubmitted = d.isExamSubmitted || false;
+          timeLeft = d.timeLeft || 3600;
+          activeFilter = d.activeFilter || 'all';
+
+          if (currentMode === 'exam' && d.examQuestionIds) {
+            currentQuestions = d.examQuestionIds.map(id => rawQuizData.find(q => q.id === id)).filter(Boolean);
+            setupExamUI();
+            if (!isExamSubmitted) startTimer();
+          } else {
+            setupStudyUI();
+          }
+        } catch(e) { setupStudyUI(); }
+      } else {
+        setupStudyUI();
+      }
+      renderAll();
+    }
+
+    function setupStudyUI() {
+      currentMode = 'study';
+      currentQuestions = [...rawQuizData];
+      document.getElementById('mode-display').innerText = 'CHẾ ĐỘ ÔN TẬP';
+      document.getElementById('mode-display').style.background = '#0284c7';
+      document.getElementById('btn-start-exam').style.display = 'inline-flex';
+      document.getElementById('btn-start-study').style.display = 'none';
+      document.getElementById('btn-submit-exam').style.display = 'none';
+      document.getElementById('btn-show-all').style.display = 'inline-flex';
+      document.getElementById('btn-unanswered').style.display = 'inline-flex';
+      document.getElementById('exam-timer').style.display = 'none';
+      document.getElementById('chapter-filter-list').style.display = 'flex';
+      clearInterval(timerInterval);
+    }
+
+    function setupExamUI() {
+      currentMode = 'exam';
+      document.getElementById('mode-display').innerText = 'CHẾ ĐỘ THI THỬ (60 PHÚT)';
+      document.getElementById('mode-display').style.background = '#dc2626';
+      document.getElementById('btn-start-exam').style.display = 'none';
+      document.getElementById('btn-start-study').style.display = 'inline-flex';
+      document.getElementById('btn-submit-exam').style.display = isExamSubmitted ? 'none' : 'inline-flex';
+      document.getElementById('btn-show-all').style.display = 'none';
+      document.getElementById('btn-unanswered').style.display = 'none';
+      document.getElementById('exam-timer').style.display = 'block';
+      document.getElementById('chapter-filter-list').style.display = 'none';
+    }
+
+    function startExamMode() {
+      if (!confirm("Bắt đầu thi thử? Hệ thống sẽ chọn ngẫu nhiên 40 câu trong 60 phút.")) return;
+      currentMode = 'exam';
+      isExamSubmitted = false;
+      userAnswers = {};
+      timeLeft = 3600;
+      activeFilter = 'all';
+
+      const shuffled = [...rawQuizData].sort(() => Math.random() - 0.5);
+      currentQuestions = shuffled.slice(0, 40);
+
+      setupExamUI();
+      startTimer();
+      renderAll();
+      saveState();
+    }
+
+    function startStudyMode() {
+      if (confirm("Chuyển về ôn tập toàn bộ 100 câu?")) {
+        userAnswers = {};
+        isExamSubmitted = false;
+        setupStudyUI();
+        renderAll();
+        saveState();
+      }
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      updateTimerDisplay();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        saveState();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert("Hết giờ làm bài!");
+          submitExam();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      document.getElementById('exam-timer').innerText = `⏱ ${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+    }
+
+    function submitExam() {
+      if (!isExamSubmitted && !confirm("Bạn có chắc chắn muốn nộp bài?")) return;
+      isExamSubmitted = true;
+      clearInterval(timerInterval);
+      document.getElementById('btn-submit-exam').style.display = 'none';
+
+      let correct = 0;
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] === q.correct) correct++;
+      });
+      alert(`🎉 KẾT QUẢ THI THỬ:\n- Đúng: ${correct}/${currentQuestions.length}\n- Điểm số: ${((correct/currentQuestions.length)*10).toFixed(2)}/10`);
+      renderAll();
+      saveState();
+    }
+
+    // Các tính năng từ Toolbar cũ
+    function shuffleQuestions() {
+      currentQuestions.sort(() => Math.random() - 0.5);
+      renderAll();
+      saveState();
+    }
+
+    function showAllAnswers() {
+      if (currentMode === 'exam') return;
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] === undefined) {
+          userAnswers[q.id] = q.correct;
+        }
+      });
+      renderAll();
+      saveState();
+    }
+
+    function filterUnanswered() {
+      activeFilter = 'unanswered';
+      renderAll();
+      saveState();
+    }
+
+    function viewResultSummary() {
+      const total = currentQuestions.length;
+      const done = Object.keys(userAnswers).length;
+      let correct = 0;
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] === q.correct) correct++;
+      });
+      const score = total > 0 ? ((correct / total) * 10).toFixed(2) : 0;
+      alert(`📊 THỐNG KÊ KẾT QUẢ:\n- Đã làm: ${done}/${total} câu\n- Đúng: ${correct} câu\n- Điểm số: ${score}/10`);
+    }
+
+    function renderFilters() {
+      const filterBox = document.getElementById('chapter-filter-list');
+      if (currentMode === 'exam') {
+        filterBox.style.display = 'none';
+        return;
+      }
+      filterBox.style.display = 'flex';
+      filterBox.innerHTML = '';
+      const chapters = [...new Set(rawQuizData.map(q => q.chapter).filter(Boolean))];
+
+      const allBtn = document.createElement('button');
+      allBtn.className = `filter-btn ${activeFilter === 'all' ? 'active' : ''}`;
+      allBtn.innerText = `Tất cả (${rawQuizData.length})`;
+      allBtn.onclick = () => { activeFilter = 'all'; renderAll(); saveState(); };
+      filterBox.appendChild(allBtn);
+
+      chapters.forEach(ch => {
+        const count = rawQuizData.filter(q => q.chapter === ch).length;
+        const btn = document.createElement('button');
+        btn.className = `filter-btn ${activeFilter === ch ? 'active' : ''}`;
+        btn.innerText = `${ch} (${count})`;
+        btn.onclick = () => { activeFilter = ch; renderAll(); saveState(); };
+        filterBox.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(qId, optIdx) {
+      if (currentMode === 'study') {
+        if (userAnswers[qId] !== undefined) return;
+        userAnswers[qId] = optIdx;
+      } else {
+        if (isExamSubmitted) return;
+        userAnswers[qId] = optIdx;
+      }
+      renderAll();
+      saveState();
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById('questions-stream');
+      container.innerHTML = '';
+
+      let list = currentQuestions;
+      if (currentMode === 'study') {
+        if (activeFilter === 'unanswered') {
+          list = currentQuestions.filter(q => userAnswers[q.id] === undefined);
+        } else if (activeFilter !== 'all') {
+          list = currentQuestions.filter(q => q.chapter === activeFilter);
+        }
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-muted);">Không có câu hỏi nào.</div>`;
+        return;
+      }
+
+      list.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `q-card-${q.id}`;
+
+        const isAnswered = userAnswers[q.id] !== undefined;
+        const selectedOpt = userAnswers[q.id];
+
+        let optionsHTML = q.options.map((opt, optIdx) => {
+          let extraClass = "";
+          if (currentMode === 'study') {
+            if (isAnswered) {
+              extraClass += " locked";
+              if (optIdx === q.correct) extraClass += " opt-correct";
+              if (selectedOpt === optIdx && optIdx !== q.correct) extraClass += " opt-wrong";
+            }
+          } else {
+            if (!isExamSubmitted) {
+              if (selectedOpt === optIdx) extraClass += " selected-exam";
+            } else {
+              extraClass += " locked";
+              if (optIdx === q.correct) extraClass += " opt-correct";
+              if (selectedOpt === optIdx && optIdx !== q.correct) extraClass += " opt-wrong";
+            }
+          }
+          return `<div class="option-item ${extraClass}" onclick="selectAnswer(${q.id}, ${optIdx})">${opt}</div>`;
+        }).join('');
+
+        const showSol = (currentMode === 'study' && isAnswered) || (currentMode === 'exam' && isExamSubmitted);
+
+        card.innerHTML = `
+          <div class="question-header">
+            <div class="badge-idx">${q.id}</div>
+            <div class="question-title">${q.question}</div>
+          </div>
+          <div class="options-grid">${optionsHTML}</div>
+          <div class="solution-box" style="display: ${showSol ? 'block' : 'none'};">
+            <strong>💡 Hướng dẫn giải chi tiết:</strong><br>${q.explanation}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    function renderPalette() {
+      const palette = document.getElementById('palette-grid');
+      palette.innerHTML = '';
+
+      let list = currentQuestions;
+      if (currentMode === 'study') {
+        if (activeFilter === 'unanswered') {
+          list = currentQuestions.filter(q => userAnswers[q.id] === undefined);
+        } else if (activeFilter !== 'all') {
+          list = currentQuestions.filter(q => q.chapter === activeFilter);
+        }
+      }
+
+      list.forEach((q, idx) => {
+        const item = document.createElement('a');
+        item.className = 'palette-item';
+        item.innerText = q.id;
+        item.href = `#q-card-${q.id}`;
+
+        const isAnswered = userAnswers[q.id] !== undefined;
+        if (currentMode === 'study') {
+          if (isAnswered) {
+            item.classList.add(userAnswers[q.id] === q.correct ? 'correct' : 'wrong');
+          }
+        } else {
+          if (isExamSubmitted) {
+            item.classList.add(isAnswered && userAnswers[q.id] === q.correct ? 'correct' : 'wrong');
+          } else if (isAnswered) {
+            item.classList.add('answered');
+          }
+        }
+        palette.appendChild(item);
+      });
+    }
+
+    function updateStats() {
+      const total = currentQuestions.length;
+      const done = Object.keys(userAnswers).filter(id => currentQuestions.some(q => q.id == id)).length;
+      let correct = 0;
+      let wrong = 0;
+
+      currentQuestions.forEach(q => {
+        if (userAnswers[q.id] !== undefined) {
+          if (userAnswers[q.id] === q.correct) correct++;
+          else wrong++;
+        }
+      });
+
+      document.getElementById('stat-total').innerText = total;
+      document.getElementById('stat-done').innerText = done;
+
+      if (currentMode === 'study' || isExamSubmitted) {
+        document.getElementById('stat-correct').innerText = correct;
+        document.getElementById('stat-wrong').innerText = wrong;
+      } else {
+        document.getElementById('stat-correct').innerText = '-';
+        document.getElementById('stat-wrong').innerText = '-';
+      }
+
+      const percent = total > 0 ? (done / total) * 100 : 0;
+      document.getElementById('progress-fill').style.width = `${percent}%`;
+      document.getElementById('progress-text').innerText = `${done} / ${total}`;
+    }
+
+    function renderAll() {
+      renderFilters();
+      renderQuestions();
+      renderPalette();
+      updateStats();
+    }
+
+    function resetState() {
+      if (confirm("Làm lại từ đầu? Toàn bộ tiến độ sẽ bị xóa.")) {
+        userAnswers = {};
+        isExamSubmitted = false;
+        activeFilter = 'all';
+        if (currentMode === 'exam') timeLeft = 3600;
+        renderAll();
+        saveState();
+      }
+    }
+  </script>
+</body>
+</html>
