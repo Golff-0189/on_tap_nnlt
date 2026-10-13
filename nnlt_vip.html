@@ -133,9 +133,12 @@
     .palette-item.wrong { background: var(--danger); color: white; border-color: var(--danger); }
 
     .stats-card {
-      background: var(--card-bg); border-radius: 14px; padding: 16px 20px;
+      background: var(--card-bg); border-radius: 14px; padding: 14px 20px;
       margin: 16px 0; border: 1px solid var(--border-color);
       display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+      position: sticky; top: 12px; z-index: 100;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      backdrop-filter: blur(8px);
     }
     .stat-items-group { display: flex; gap: 16px; }
     .stat-item { text-align: center; }
@@ -251,7 +254,7 @@
 
         <!-- Thanh công cụ (Toolbar đầy đủ) -->
         <section class="action-toolbar">
-          <button class="tool-btn btn-exam" id="btn-start-exam" onclick="startExamMode()">⏱ Thi thử (40 câu / 60p)</button>
+          <button class="tool-btn btn-exam" id="btn-start-exam" onclick="chooseExamSet()">⏱ Chọn đề thi thử (Đề 1 - 9)</button>
           <button class="tool-btn btn-study" id="btn-start-study" onclick="startStudyMode()" style="display:none;">📖 Ôn tập toàn bộ</button>
           <button class="tool-btn btn-submit" id="btn-submit-exam" onclick="submitExam()">📤 Nộp bài thi</button>
           <button class="tool-btn btn-result" onclick="viewResultSummary()">📊 Kết quả</button>
@@ -280,7 +283,7 @@
     // ==========================================
     // 1. CẤU HÌNH MẬT KHẨU
     // ==========================================
-    const ACCESS_PASS = "beancute";
+    const ACCESS_PASS = "hoanganhcute";
 
     function verifyPassword() {
       const input = document.getElementById('pass-input').value;
@@ -1357,6 +1360,439 @@
         options: ["A. 3 2 1 ", "B. 3 3 3 ", "C. 0 1 2 3 ", "D. 1 2 3 "],
         correct: 3,
         explanation: "<b>Đáp án D:</b> Lệnh printf đặt SAU lời gọi đệ quy (hậu thứ tự - post-order), hàm đi sâu đến đáy (n=0) rồi mới quay lui in lần lượt: 1 2 3."
+      },
+      // =========================================================================
+      // CÁC CÂU BỔ SUNG TỪ ĐỀ ÔN TẬP GIỮA KỲ KHOA ĐIỆN - ĐIỆN TỬ (CÂU 101 - 140)
+      // ĐÃ PHÂN LOẠI CHUẨN XÁC THEO 8 PHẦN CỦA MÔN HỌC
+      // =========================================================================
+      {
+        id: 101,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Hệ đếm Hexadecimal (Thập lục phân) sử dụng các ký tự nào để biểu diễn giá trị từ 10 đến 15?",
+        options: [
+          "A. A, B, C, D, E, F",
+          "B. 10, 11, 12, 13, 14, 15",
+          "C. X, Y, Z, U, V, W",
+          "D. A, B, C, D, E, G"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Hệ Hexadecimal (cơ số 16) dùng các chữ cái từ A đến F để biểu diễn các giá trị tương ứng: A=10, B=11, C=12, D=13, E=14, F=15."
+      },
+      {
+        id: 102,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Giá trị thập phân 27₁₀ khi chuyển sang hệ nhị phân 5-bit sẽ có kết quả là:",
+        options: [
+          "A. 11011₂",
+          "B. 10111₂",
+          "C. 11101₂",
+          "D. 10011₂"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Phân tích thành tổng các lũy thừa của 2: 27 = 16 + 8 + 2 + 1 = 11011₂."
+      },
+      {
+        id: 103,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Trong mô hình vi kiến trúc Von Neumann, thanh ghi PC (Program Counter) dùng để:",
+        options: [
+          "A. Chứa dữ liệu đọc từ bộ nhớ",
+          "B. Trỏ đến địa chỉ của lệnh tiếp theo sẽ được thực thi",
+          "C. Thực hiện các phép toán ALU",
+          "D. Chứa kết quả phép so sánh"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Program Counter (PC) là con trỏ lệnh, có chức năng lưu trữ địa chỉ ô nhớ của lệnh tiếp theo mà CPU sẽ nạp vào để thực thi."
+      },
+      {
+        id: 104,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Dạng biểu diễn nhị phân Bù 2 của số âm -12 trong chuỗi 5-bit là:",
+        options: [
+          "A. 10100₂",
+          "B. 10011₂",
+          "C. 01100₂",
+          "D. 11100₂"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Trị tuyệt đối 12 = 01100₂. Đảo bit lấy Bù 1: 10011₂. Cộng thêm 1 lấy Bù 2: 10011₂ + 1 = 10100₂."
+      },
+      {
+        id: 105,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Thao tác Mở rộng dấu (Sign Extension - SEXT) khi chuyển số Bù 2 âm 6-bit '100101' sang 16-bit sẽ thu được kết quả là:",
+        options: [
+          "A. 0000000000100101",
+          "B. 1111111111100101",
+          "C. 1000000000100101",
+          "D. 1111111111011010"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Chuỗi có MSB = 1 (số âm). Khi mở rộng từ 6-bit lên 16-bit, ta phải chèn thêm mười bit 1 vào bên trái để giữ nguyên giá trị đại số: 1111111111100101."
+      },
+      {
+        id: 106,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Theo chuẩn IEEE 754 Single Precision (32-bit), số lượng bit dành cho vùng Số mũ (Exponent) và độ lệch Bias tương ứng là:",
+        options: [
+          "A. 8 bit, Bias = 127",
+          "B. 11 bit, Bias = 1023",
+          "C. 23 bit, Bias = 127",
+          "D. 8 bit, Bias = 255"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Chuẩn float 32-bit gồm: 1 bit Sign, 8 bit Exponent (độ lệch Bias = 127), và 23 bit Fraction (Mantissa)."
+      },
+      {
+        id: 107,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Giá trị của biểu diễn IEEE 754 32-bit '0 10000011 00101000000000000000000' trong hệ thập phân là:",
+        options: [
+          "A. 18.5",
+          "B. -9.25",
+          "C. 37.0",
+          "D. 8.25"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Bit dấu S = 0 (+). Số mũ E = 10000011₂ = 131 -> k = 131 - 127 = 4. Giá trị N = +1.00101₂ × 2⁴ = 10010.1₂ = 16 + 2 + 0.5 = 18.5."
+      },
+      {
+        id: 108,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Trong chuẩn IEEE 754 (32-bit), nếu vùng Exponent chứa toàn bit 1 (11111111₂) và Fraction = 0, biểu thức sẽ có giá trị là:",
+        options: [
+          "A. Không phải số (NaN)",
+          "B. Số 0",
+          "C. Vô cực (±∞ tùy bit dấu S)",
+          "D. Bị tràn số số nguyên"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Khi E = 255 và Fraction = 0, giá trị đại diện cho vô cực (+∞ nếu S=0, -∞ nếu S=1). Nếu Fraction ≠ 0 thì mới là NaN (Not a Number)."
+      },
+      {
+        id: 109,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Hằng thực dạng số mũ '2.1415e4' trong ngôn ngữ C biểu diễn giá trị thập phân nào sau đây?",
+        options: [
+          "A. 214.15",
+          "B. 21415.0",
+          "C. 0.00021415",
+          "D. 2.14154"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Ký tự e/E tương đương nhân với 10 lũy thừa k: 2.1415e4 = 2.1415 × 10⁴ = 21415.0."
+      },
+      {
+        id: 110,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Transistor N-MOS dẫn điện (đóng công tắc) khi mức điện thế ngõ vào ở trạng thái:",
+        options: [
+          "A. Mức thấp (Logic 0)",
+          "B. Mức cao (Logic 1)",
+          "C. Mức lơ lửng",
+          "D. Luôn dẫn điện"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Transistor N-MOS dẫn điện khi ngõ vào = 1 (mức cao), ngược lại P-MOS dẫn điện khi ngõ vào = 0 (mức thấp)."
+      },
+      {
+        id: 111,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Mạch tổ hợp Decoder (Mạch giải mã) có n đường ngõ vào thì số đường ngõ ra sẽ là:",
+        options: [
+          "A. n²",
+          "B. 2n",
+          "C. 2ⁿ",
+          "D. n + 1"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Mạch giải mã (Decoder) nhận n tín hiệu đầu vào và kích hoạt duy nhất một trong 2ⁿ đường đầu ra tương ứng."
+      },
+      {
+        id: 112,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Điểm khác biệt cơ bản giữa Mạch tổ hợp (Combinational) và Mạch tuần tự (Sequential) là:",
+        options: [
+          "A. Mạch tuần tự có khả năng lưu trữ thông tin (trạng thái quá khứ), mạch tổ hợp thì không",
+          "B. Mạch tổ hợp chạy nhanh hơn",
+          "C. Mạch tổ hợp không dùng cổng logic",
+          "D. Mạch tuần tự không có ngõ ra"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Mạch tuần tự chứa các phần tử nhớ (như Flip-flop, RAM) nên ngõ ra phụ thuộc cả ngõ vào hiện tại lẫn trạng thái quá khứ, còn mạch tổ hợp thì không lưu trữ."
+      },
+      {
+        id: 113,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Tên biến nào sau đây là HỢP LỆ trong ngôn ngữ C?",
+        options: [
+          "A. 2_bien",
+          "B. dem-so",
+          "C. _bien_1",
+          "D. float"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Tên biến hợp lệ có thể bắt đầu bằng chữ cái hoặc dấu gạch dưới (_). '2_bien' sai vì bắt đầu bằng số, 'dem-so' sai vì chứa dấu trừ, 'float' trùng từ khóa."
+      },
+      {
+        id: 114,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Ngôn ngữ C xử lý thế nào đối với chữ hoa và chữ thường trong danh hiệu (Identifier)?",
+        options: [
+          "A. Không phân biệt",
+          "B. Phân biệt chữ hoa và chữ thường (ABC khác abc)",
+          "C. Chuyển tất cả thành chữ hoa",
+          "D. Chỉ phân biệt ký tự đầu"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Ngôn ngữ C có tính phân biệt chữ hoa - chữ thường tuyệt đối (Case-sensitive)."
+      },
+      {
+        id: 115,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Kích thước bộ nhớ của kiểu dữ liệu 'char' trong C chuẩn là:",
+        options: [
+          "A. 1 byte (8 bit)",
+          "B. 2 byte",
+          "C. 4 byte",
+          "D. 8 byte"
+        ],
+        correct: 0,
+        explanation: "<b>Đáp án A:</b> Tiêu chuẩn C quy định sizeof(char) luôn bằng đúng 1 byte (chứa ít nhất 8 bit)."
+      },
+      {
+        id: 116,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Phép toán lấy số dư '%' (Modulo) trong C chỉ có thể áp dụng cho các toán hạng thuộc kiểu nào?",
+        options: [
+          "A. Tất cả các kiểu",
+          "B. Chỉ số thực (float, double)",
+          "C. Chỉ số nguyên (char, int, long)",
+          "D. Kiểu con trỏ"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Toán tử % chỉ dùng cho các kiểu số nguyên (integral types), áp dụng lên số thực float/double sẽ gây lỗi biên dịch."
+      },
+      {
+        id: 117,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Cho n = 5; sau khi thực hiện lệnh 'n += 3 * 2;', giá trị của n là bao nhiêu?",
+        options: [
+          "A. 16",
+          "B. 11",
+          "C. 13",
+          "D. 10"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Toán tử nhân (*) ưu tiên tính trước: 3 * 2 = 6. Sau đó n += 6 thực thi: n = 5 + 6 = 11."
+      },
+      {
+        id: 118,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Đoạn code 'int x = (5 > 3) ? 10 : 20;' sẽ gán giá trị nào cho x?",
+        options: [
+          "A. 5",
+          "B. 3",
+          "C. 10",
+          "D. 20"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Biểu thức (5 > 3) mang giá trị Đúng (1) nên toán tử tam nguyên ?: trả về giá trị của nhánh thứ nhất là 10."
+      },
+      {
+        id: 119,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Phép dịch bit trái 'x << 2' với x = 3 (00000011₂) sẽ trả về giá trị thập phân là:",
+        options: [
+          "A. 6",
+          "B. 12",
+          "C. 1.5",
+          "D. 24"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Dịch trái 2 bit tương đương nhân với 2² = 4: 3 × 4 = 12 (nhị phân: 00001100₂)."
+      },
+      {
+        id: 120,
+        chapter: "Phần 2: Kiểu dữ liệu, toán tử, I/O",
+        question: "Trong bảng độ ưu tiên toán tử của C, nhóm toán tử nào có độ ưu tiên CAO NHẤT?",
+        options: [
+          "A. +, -, *, /",
+          "B. &&, ||",
+          "C. (), [], ->, .",
+          "D. =, +=, -="
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Nhóm toán tử hậu tố / truy xuất thành phần / ngoặc: (), [], ->, . luôn đứng ở đỉnh cao nhất trong bảng độ ưu tiên."
+      },
+      {
+        id: 121,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong cấu trúc 'switch-case', điều gì xảy ra nếu một case phù hợp được thi hành nhưng không có 'break' ở cuối?",
+        options: [
+          "A. Báo lỗi cú pháp",
+          "B. Tự động thoát khỏi switch",
+          "C. Trôi lệnh xuống thực thi tiếp các case bên dưới",
+          "D. Lặp vô tận"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Hiện tượng Fall-through: nếu không có lệnh break, CPU sẽ tự động rơi xuống và thực thi tuần tự các câu lệnh của các case tiếp theo."
+      },
+      {
+        id: 122,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Điểm khác biệt chính giữa vòng lặp 'while' và 'do-while' là:",
+        options: [
+          "A. while chạy nhanh hơn",
+          "B. do-while luôn thực hiện thân lặp ít nhất 1 lần, while có thể chạy 0 lần",
+          "C. while không cần điều kiện dừng",
+          "D. do-while không dùng được break"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> do-while kiểm tra điều kiện sau khi chạy thân lặp nên luôn thực thi tối thiểu 1 lần; còn while kiểm tra điều kiện trước nên có thể chạy 0 lần."
+      },
+      {
+        id: 123,
+        chapter: "Phần 4: Vòng lặp & điều khiển",
+        question: "Lệnh 'continue' trong vòng lặp for có tác dụng gì?",
+        options: [
+          "A. Thoát khỏi vòng lặp",
+          "B. Dừng chương trình",
+          "C. Bỏ qua các lệnh còn lại trong lượt hiện tại, chuyển sang lượt lặp kế tiếp",
+          "D. Nhảy đến case default"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> continue lập tức bỏ qua các câu lệnh còn lại trong thân lặp của vòng hiện tại và nhảy tới biểu thức bước tăng để bắt đầu lượt lặp mới."
+      },
+      {
+        id: 124,
+        chapter: "Phần 1: Tổng quan máy tính và C",
+        question: "Vai trò của hàm 'main()' trong chương trình C là:",
+        options: [
+          "A. Là hàm phụ tùy chọn",
+          "B. Là điểm bắt đầu thực thi của chương trình",
+          "C. Khai báo biến toàn cục",
+          "D. Định nghĩa cổng logic"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Hàm main() là điểm vào chuẩn (Entry point) - nơi hệ điều hành bắt đầu chuyển quyền điều khiển để thực thi chương trình C."
+      },
+      {
+        id: 125,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Khi truyền tham số cho hàm dạng Truyền theo giá trị (Pass by Value):",
+        options: [
+          "A. Biến gốc bị thay đổi",
+          "B. Một bản sao dữ liệu được tạo ra, thay đổi trong hàm không ảnh hưởng biến gốc",
+          "C. Truyền địa chỉ ô nhớ",
+          "D. Bị tràn bộ nhớ"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Pass by Value chỉ sao chép giá trị vào ngăn xếp của hàm con, mọi thao tác gán lại bên trong hàm con không tác động tới biến ở hàm cha."
+      },
+      {
+        id: 126,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Để hàm có thể sửa đổi trực tiếp giá trị của một biến ngoài hàm gọi, ta phải truyền tham số dạng:",
+        options: [
+          "A. Truyền giá trị",
+          "B. Truyền con trỏ / Địa chỉ (&x)",
+          "C. Truyền hằng số",
+          "D. Truyền mảng 2 chiều"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Phải truyền địa chỉ ô nhớ qua con trỏ (&x) để hàm con có thể giải tham chiếu (*) và ghi đè trực tiếp lên ô nhớ của biến gốc."
+      },
+      {
+        id: 127,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Yêu cầu bắt buộc đối với một hàm đệ quy để không bị lỗi tràn bộ nhớ Call Stack là:",
+        options: [
+          "A. Không dùng biến cục bộ",
+          "B. Phải có Điều kiện dừng (Base case)",
+          "C. Phải trả về void",
+          "D. Phải dùng static"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Hàm đệ quy bắt buộc phải có điều kiện dừng (Base case) để ngắt chuỗi lời gọi, nếu không hàm sẽ tự gọi mãi mãi gây tràn ngăn xếp (Stack Overflow)."
+      },
+      {
+        id: 128,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Biến cục bộ khai báo bên trong một khối lệnh '{}' mà không có từ khóa bổ trợ thuộc lớp lưu trữ nào?",
+        options: [
+          "A. Biến toàn cục",
+          "B. auto (tự động)",
+          "C. static",
+          "D. register"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Mặc định mọi biến cục bộ khai báo trong khối lệnh đều có lớp lưu trữ tự động (auto), tự tạo khi vào khối và tự hủy khi thoát khối."
+      },
+      {
+        id: 129,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Biến cục bộ khai báo với từ khóa 'static' có đặc điểm nổi bật nào?",
+        options: [
+          "A. Tự động xóa khi thoát hàm",
+          "B. Giữ nguyên giá trị cũ giữa các lần gọi hàm khác nhau",
+          "C. Truy cập từ mọi file",
+          "D. Lưu trên thanh ghi"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Biến static cục bộ được lưu ở Data segment, tồn tại suốt vòng đời chương trình và duy trì giá trị tích lũy giữa các lần gọi hàm liên tiếp."
+      },
+      {
+        id: 130,
+        chapter: "Phần 5: Hàm & phạm vi biến",
+        question: "Từ khóa 'extern' trong C dùng để:",
+        options: [
+          "A. Khai báo biến tĩnh",
+          "B. Thông báo biến/hàm toàn cục được định nghĩa ở một module/file khác",
+          "C. Ép kiểu",
+          "D. Xóa biến khỏi bộ nhớ"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> extern khai báo cho trình biên dịch biết rằng biến hoặc hàm này đã được định nghĩa tại một file nguồn khác và sẽ được liên kết ở khâu Linker."
+      },
+      {
+        id: 131,
+        chapter: "Phần 3: Điều kiện & lưu đồ",
+        question: "Trong sơ đồ Lưu đồ (Flowchart), hình THOI được dùng để biểu diễn:",
+        options: [
+          "A. Khối Start/End",
+          "B. Khối I/O",
+          "C. Khối Điều kiện / Rẽ nhánh",
+          "D. Khối Tính toán"
+        ],
+        correct: 2,
+        explanation: "<b>Đáp án C:</b> Hình thoi là ký hiệu quy ước chuẩn đại diện cho khối kiểm tra điều kiện / rẽ nhánh (Decision block)."
+      },
+      {
+        id: 132,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Cấu trúc dữ liệu Ngăn xếp (Stack) hoạt động theo nguyên lý nào?",
+        options: [
+          "A. FIFO (First In, First Out)",
+          "B. LIFO (Last In, First Out)",
+          "C. LILO",
+          "D. Truy cập ngẫu nhiên"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Ngăn xếp (Stack) tuân thủ nguyên lý LIFO (Last In, First Out): phần tử được đẩy vào sau cùng sẽ được lấy ra đầu tiên."
+      },
+      {
+        id: 133,
+        chapter: "Phần 6: Ngăn xếp & đệ quy",
+        question: "Vùng nhớ Call Stack dùng để làm gì khi chương trình thực thi lời gọi hàm?",
+        options: [
+          "A. Lưu đĩa cứng",
+          "B. Lưu trữ khung bộ nhớ (Stack Frame) chứa tham số, địa chỉ trở về và biến cục bộ của hàm",
+          "C. Dịch mã Assembly",
+          "D. Lưu lưu đồ"
+        ],
+        correct: 1,
+        explanation: "<b>Đáp án B:</b> Call Stack quản lý các Stack Frame phục vụ cho việc thực thi hàm (lưu biến cục bộ, tham số truyền vào và địa chỉ quay về cho CPU)."
       }
     ];
 
@@ -3300,21 +3736,74 @@ rawQuizData = [
       document.getElementById('chapter-filter-list').style.display = 'none';
     }
 
-    function startExamMode() {
-      if (!confirm("Bắt đầu thi thử? Hệ thống sẽ chọn ngẫu nhiên 40 câu trong 60 phút.")) return;
+    let examSets = []; 
+    let currentExamIndex = 1;
+
+    // Phân bổ đều câu hỏi từ các chương vào 9 đề độc lập không trùng lặp
+    function buildBalancedExamSets(numSets = 9) {
+      const sets = Array.from({ length: numSets }, () => []);
+
+      const chapterGroups = {};
+      rawQuizData.forEach(q => {
+        const ch = q.chapter || "Chung";
+        if (!chapterGroups[ch]) chapterGroups[ch] = [];
+        chapterGroups[ch].push(q);
+      });
+
+      Object.keys(chapterGroups).forEach(ch => {
+        const shuffledInChapter = [...chapterGroups[ch]].sort(() => Math.random() - 0.5);
+        shuffledInChapter.forEach((q, idx) => {
+          const targetSet = idx % numSets;
+          sets[targetSet].push(q);
+        });
+      });
+
+      return sets.map(s => s.sort(() => Math.random() - 0.5));
+    }
+
+    function chooseExamSet() {
+      if (examSets.length === 0) {
+        examSets = buildBalancedExamSets(9);
+      }
+
+      let msg = `Hệ thống có ${rawQuizData.length} câu, đã chia thành 9 đề thi thử chuẩn (bao quát đủ mọi chương, không trùng lặp):\n`;
+      examSets.forEach((s, idx) => {
+        msg += `- Đề ${idx + 1}: gồm ${s.length} câu\n`;
+      });
+      msg += `\nNhập số thứ tự đề muốn thi (1 - 9):`;
+
+      const choice = prompt(msg, currentExamIndex.toString());
+      if (!choice) return;
+
+      const setIdx = parseInt(choice);
+      if (isNaN(setIdx) || setIdx < 1 || setIdx > 9) {
+        alert("Số đề không hợp lệ! Vui lòng chọn từ 1 đến 9.");
+        return;
+      }
+
+      startExamMode(setIdx);
+    }
+
+    function startExamMode(setIdx = 1) {
+      if (examSets.length === 0) {
+        examSets = buildBalancedExamSets(9);
+      }
+
+      currentExamIndex = setIdx;
+      currentQuestions = [...examSets[setIdx - 1]];
+
       currentMode = 'exam';
       isExamSubmitted = false;
       userAnswers = {};
       timeLeft = 3600;
       activeFilter = 'all';
 
-      const shuffled = [...rawQuizData].sort(() => Math.random() - 0.5);
-      currentQuestions = shuffled.slice(0, 40);
-
       setupExamUI();
+      document.getElementById('mode-display').innerText = `CHẾ ĐỘ THI THỬ - ĐỀ SỐ ${currentExamIndex} (60 PHÚT)`;
       startTimer();
       renderAll();
       saveState();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function startStudyMode() {
